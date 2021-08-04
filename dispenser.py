@@ -1,9 +1,7 @@
 import random
 import copy
 import argparse
-# from contextlib import contextmanager
 import os, sys
-# from io import StringIO
 import math
 
 def print_progress_bar (iteration, total, prefix = '', suffix = '',
@@ -20,6 +18,8 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
         fill        - Optional  : bar fill character (Str)
         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
+    # modified function from StackOverflow
+    
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = length * iteration / total
     extra, real_length = math.modf(filled_length)
@@ -27,6 +27,7 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
     edge = ['-', '░', '▒', '▓'][int(extra*4)] if (length - real_length - 1 >= 0) else ''
     bar = fill * real_length + edge + '-' * (length - real_length - 1)
     print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = print_end)
+    
     # Print New Line on Complete
     if iteration == total: 
         print(' '*length*2, end = '\r')
@@ -42,8 +43,8 @@ values are larger, it\'s recommended to change the default values. This means in
 to get better result. If you do so, it\'s also recommended to increase gradient proportionally. However, the situation \
 may be different, so it\'s best to modify according to circumstances.')
 
-parser.add_argument('people_file', type=str, help='Input file with people data')
-parser.add_argument('things_file', type=str, help='Input file with things data')
+parser.add_argument('people_file', type = str, help='Input file with people data')
+parser.add_argument('things_file', type = str, help='Input file with things data')
 
 parser.add_argument('-o', '--output_file', dest = 'output_file', default = None,
                     help='Output file; if not specified, stdout is used')
@@ -79,40 +80,19 @@ parser.add_argument('-p', '--pain_multiply', dest = 'pain_multiply', type=float,
 parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
                     help='Number of iterations between updating bar/log; default is 1_000')
 
-
-##parser.add_argument('-c', '--cyrillic_for_cmd', dest = 'cyrillic_for_cmd', action='store_true',
-##                    help = 'Use if you have problems with encoding')
 args = parser.parse_args()
 
-##if args.cyrillic_for_cmd:
-##      os.dup2(1, 2)
-##      print_orig = print
-##      def print(*args):
-##          @contextmanager
-##          def redirected(out):
-##              sys.stdout = out
-##              try:
-##                  yield
-##              finally:
-##                  sys.stdout = sys.__stdout__
-##       
-##          out = StringIO()
-##       
-##          with redirected(out=out):
-##              print_orig(*args)
-##              result = out.getvalue().encode('1251', errors = 'ignore')
-##       
-##          sys.stdout.buffer.write(result)
-##          sys.stdout.flush()
           
 assert os.path.isfile(args.people_file) and os.path.isfile(args.things_file)
 
 
 
 def auto_complete(array, default_values):
+    "Non-clear function, changes array"
     array.extend(default_values[len(array):])
     return array
 
+# catch errors of file reading
 try:
     people = {}
     for line in open(args.people_file, encoding='utf-8'):
@@ -128,23 +108,33 @@ try:
 
     things = []
     for line in open(args.things_file, encoding='utf-8'):
+        
           if not len(line) or line[0] == '#':
               continue
+            
           current = line.strip().split()
+          
           if not len(current):
                 continue
+          
           if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
           things.append([current[0], float(current[1]),
                          (None if current[2] == 'None' else current[2]), float(current[3])])
           
     for thing in things:
           assert thing[2] in names or thing[2] == None
+          
 except IndexError:
     raise SyntaxError('Invalid file input length'
                       + ('. Try -a option to automaticly add insufficient values.' if not  args.auto_complete else '') +
                       f' Error in line:\n{line}')
+
 except (TypeError, ValueError):
     raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
+
+except AssertionError:
+    raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
+
 def generate_sequence():
       sequence = {name: [] for name in names}
 
@@ -154,46 +144,34 @@ def generate_sequence():
       return sequence
 
 def personal_pain(things, person):
-      
+
+      # special function is needed to optimize calculating pain from random move
       pain = sum(thing[3] for thing in things if thing[2] != person)
             
       sum_mass = sum([thing[1] for thing in things])
       good_mass, endurance = people[person]
-      #if sum_mass > good_mass:
-      #      pain += endurance*(sum_mass - good_mass)**2
       pain += args.pain_multiply * endurance**(sum_mass/good_mass - 1)
       return pain
 
 def count_pain(seq):
+    
+      # needed only for output; optimizing this is senselessly
       pain = 0
       for person in seq:
             pain += personal_pain(seq[person], person)
       return pain
 
-def rand_move():
-      sequence_ = copy.deepcopy(sequence)
-      
-      from_p, to_p = random.sample(names, 2)
-
-      from_things = sequence_[from_p]
-      
-      if not len(from_things):
-            return rand_move()
-            
-      
-      #print(len(from_things))
-      
-      thing = from_things.pop(random.randrange(len(from_things)))
-      sequence_[to_p].append(thing)
-      return sequence_
 
 def optimized_rand_move(seq, extra_energy):
+    
       from_p, to_p = random.sample(names, 2)
       things_from, things_to = seq[from_p], seq[to_p]
       
       if not len(things_from):
+            # interrupt if person we want to take from hasn't things at all
             return
-      
+
+      # to count energy difference should be known only the energy that changes
       start_energy = (personal_pain(things_from, from_p) +
                       personal_pain(things_to, to_p))
 
@@ -236,6 +214,7 @@ def printer():
 all_text = ''
 if not args.print_own:
       for attempt in range(args.epoch_number):
+          
             sequence = generate_sequence()
             if not args.disable_progress_info:
                   print(f'Epoch {attempt + 1}/{args.epoch_number}')
@@ -243,14 +222,11 @@ if not args.print_own:
             for i in range(args.iteration_number):
                   T = args.start_temperature*10**(-i/args.gradient)
                   optimized_rand_move(sequence, T*random.random())
-##                  new_seq = rand_move()
-##                  
-##                  if count_pain(new_seq) - count_pain(sequence) < T*random.random():
-##                        sequence = new_seq
                         
-                  if not i%1000:
+                  if not i%args.update_freq:
                         if args.print_log:
                               print(round(count_pain(sequence), 2), round(T, 3))
+                              
                         elif not args.disable_progress_info:
                               print_progress_bar(i, args.iteration_number, prefix = 'Progress:',
                                                  suffix = 'Complete')
@@ -266,13 +242,19 @@ if not args.print_own:
                   print(text)
             
 else:
+      # print just owners
       sequence = {name: [] for name in names}
+      
       for thing in things:
             name = thing[2]
             if name is None:
                   continue
             sequence[name].append(thing)
-      print(printer())
+      
+      if args.output_file:
+          all_text += printer()
+      else:
+          print(printer())
 
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
