@@ -4,9 +4,9 @@ This little program is created to help with planning a group hiking trip. One of
 
 ## Usage
 
-As required input it takes files with people description and things. Both files should contain text with line = one person/thing. Empty lines or comments (start with «#») are possible.
+As required input it takes YAML file with people description and things. Usage of YAML allows using anchors, inheritance, infinities e.t.c. Full syntax description: [Wiki](https://en.wikipedia.org/wiki/YAML#Syntax), [Official spec](http://yaml.org/spec/1.2/spec.html#id2803362).
 
-`python dispenser.py [OPTIONS] <people file> <things file>`
+`python dispenser.py [OPTIONS] <yaml file>`
 
 ### Options
 

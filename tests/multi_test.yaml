@@ -1,0 +1,245 @@
+---
+optimize:
+  - mass
+  - size # litres?
+
+variables:
+  - &high 30
+  - &low 2.5
+  - &ulow 5
+  - &med 10
+
+people:
+
+ Андрей_С.:
+   mass: {opt: 7, sens: 10}
+   size: &n_size {opt: 20, sens: 10}
+
+ Вова:
+   mass: {opt: 7, sens: 16}
+   size: *n_size
+
+ Андрей_В.:
+   mass: {opt: 8, sens: 11}
+   size: *n_size
+
+ Аня:
+   mass: {opt: 5, sens: 14}
+   size: *n_size
+
+ Андрей_Е.:
+   mass: {opt: 7, sens: 10}
+   size: *n_size
+
+ Амир:
+   mass: {opt: 6, sens: 15}
+   size: *n_size
+
+ НА:
+   mass: {opt: 9, sens: 100}
+   size: *n_size
+
+things:
+
+  Гитара_А:
+      mass: 5.0
+      owr: Андрей_С.
+      mrl: *high
+
+  Котел_1:
+      mass: 1.5
+      owr: НА
+      mrl: *ulow
+
+  Котел_2:
+     mass: 2.0
+
+  Мешки_мусорные:
+     mass: 0.5
+     size: 1
+
+  Палатка_А:
+      mass: 5.0
+      owr: Андрей_С.
+      mrl: *ulow
+      size: 10
+
+  Палатка_Н:
+      mass: 5.0
+      owr: НА
+      mrl: *ulow
+      size: 10
+
+  Пила:
+      mass: 0.7
+      owr: НА
+      mrl: *low
+      size: 3
+
+  Поварешка+сковородка:
+      mass: 1.0
+      owr: Вова
+      mrl: *ulow
+      size: 10
+
+  Средство:
+     mass: 0.5
+     size: 2
+
+  Тент:
+     mass: 3.0
+     size: 10
+
+  Топор:
+      mass: 0.8
+      owr: НА
+      mrl: *ulow
+      size: 4
+
+  Тросик:
+      mass: 0.5
+      owr: НА
+      mrl: 3.0
+      size: 2
+
+  Стол_им._Ваганова:
+      mass: 7.0
+      owr: Андрей_В.
+      mrl: *high
+
+  Дощечка_и_ножик_1:
+      mass: 0.1
+      owr: Андрей_С.   
+      mrl: *ulow
+      size: 1
+
+  Дощечка_и_ножик_2:
+      mass: 0.1
+      owr: Вова  
+      mrl: *ulow
+      size: 1
+
+  Дощечка_и_ножик_3:
+      mass: 0.1
+      owr: Андрей_В   
+      mrl: *ulow
+      size: 1
+
+  Дощечка_и_ножик_4:
+      mass: 0.1
+      owr: Андрей_С.   
+      mrl: *ulow
+      size: 1
+
+# the food starts here 
+  Соль:
+     mass: 0.2
+     size: 1
+
+  Чай:
+      mass:   1.0
+      size: 1
+
+  Сладости:
+      mass: 1.0
+      owr:  Аня
+      mrl: &med
+      size: 5
+
+  Сахар:
+      mass: 0.4
+      size: 4
+  
+  Сгущенка:
+      mass: 1.1
+      size: 8
+
+  Кетчуп:
+      mass: 0.5
+      size: 3
+
+  Хлеб:
+      mass: 1.0
+      size: 4
+
+  Картошка:
+      mass: 2.0
+      size: 4
+
+  Сосиски:
+      mass: 0.75
+      size: 3
+
+# products of Vova
+
+  Свекла_с_уксусом:
+      mass: 0.3
+      owr: Вова
+      mrl: *med
+      size: 2
+
+  Помидоры:  
+      mass: 1.0
+      owr: Вова
+      mrl: *med
+      size: 3
+
+  Морковка:
+      mass: 1.7
+      owr: Вова
+      mrl: *med
+      size: 5
+
+  Соль+специи:
+      mass: 0.15
+      owr:  Вова
+      mrl: *ulow
+      size: 1
+
+  Лук:
+      mass: 1.7
+      owr:  Вова
+      mrl: *med
+      size: 5
+
+  Чеснок:
+      mass: 0.15
+      owr:  Вова
+      mrl:  *med
+      size: 1
+
+  Тушенка:
+      mass: 1.4
+      owr:  Вова
+      mrl: *ulow
+      size: 5
+
+  О._масло:
+      mass: 0.4
+      owr:  Вова
+      mrl: *ulow
+      size: 3
+
+  Сметана:
+      mass: 0.35
+      owr:  Вова
+      mrl: *med 
+      size: 2
+
+  Сыр:
+      mass: 0.4
+      owr:  Вова
+      mrl: *med
+      size: 2
+
+  Греча:
+      mass: 0.5
+      owr: Вова
+      mrl: *low
+      size: 3
+
+  Рис:
+      mass: 1.0
+      owr: Вова
+      mrl: *low
+      size: 5
