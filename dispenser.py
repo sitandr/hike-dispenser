@@ -74,8 +74,8 @@ parser.add_argument('-g', '--gradient', dest = 'gradient', type=float, default =
 parser.add_argument('-t', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
                     help='Start temperature; default is 50 (pains)')
 
-parser.add_argument('-p', '--pain_multiply', dest = 'pain_multiply', type=float, default = 15,
-                    help='Default pain (at optimal weight); default is 15')
+parser.add_argument('-p', '--pain_multiply', dest = 'pain_multiply', type=float, default = 10,
+                    help='Default pain (at optimal weight); default is 10')
 
 parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
                     help='Number of iterations between updating bar/log; default is 1_000')
@@ -95,7 +95,7 @@ def auto_complete(array, default_values):
 # catch errors of file reading
 try:
     people = {}
-    for line in open(args.people_file, encoding='utf-8'):
+    for line in open(args.people_file, encoding = 'utf-8'):
           if not len(line) or line[0] == '#':
               continue
           current = line.strip().split()
