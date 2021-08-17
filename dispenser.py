@@ -6,6 +6,18 @@ import math
 
 import yaml
 
+# modificated funcs from StackOverFlow
+
+class UniqueKeyLoader(yaml.SafeLoader):
+     def construct_mapping(self, node, deep=False):
+         mapping = []
+         for key_node, value_node in node.value:
+             key = self.construct_object(key_node, deep=deep)
+             if key in mapping:
+                 raise SyntaxError(f'"{key}" is a duplicated key. Please try to make it different.')
+             mapping.append(key)
+         return super().construct_mapping(node, deep)
+        
 def print_progress_bar (iteration, total, prefix = '', suffix = '',
                         decimals = 1, length = 50, fill = '█', print_end = "\r"):
     """
@@ -33,7 +45,8 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
     # Print New Line on Complete
     if iteration == total: 
         print(' '*length*2, end = '\r')
-        
+
+# parse part
 
 parser = argparse.ArgumentParser(description='This program dispenses things to people (mininmizing total pain) \
 using annealing. As input it takes file with people descriptions (for each in each line there is name, \
@@ -45,8 +58,11 @@ values are larger, it\'s recommended to change the default values. This means in
 to get better result. If you do so, it\'s also recommended to increase gradient proportionally. However, the situation \
 may be different, so it\'s best to modify according to circumstances.')
 
-parser.add_argument('people_file', type = str, help='Input file with people data')
-parser.add_argument('things_file', type = str, help='Input file with things data')
+parser.add_argument('-p', '--people_and_things_files', dest = 'people_and_things_file', nargs = 2, type = str,
+                    help='Input files with people and thing data,\
+                    used with things file instead of yaml')
+
+parser.add_argument('-y', '--yaml_file', dest = 'yaml_file', type = str, help='Input file with all data in yaml')
 
 parser.add_argument('-o', '--output_file', dest = 'output_file', default = None,
                     help='Output file; if not specified, stdout is used')
@@ -76,7 +92,7 @@ parser.add_argument('-g', '--gradient', dest = 'gradient', type=float, default =
 parser.add_argument('-t', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
                     help='Start temperature; default is 50 (pains)')
 
-parser.add_argument('-p', '--pain_multiply', dest = 'pain_multiply', type=float, default = 10,
+parser.add_argument('--pain_multiply', dest = 'pain_multiply', type=float, default = 10,
                     help='Default pain (at optimal weight); default is 10')
 
 parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
@@ -85,7 +101,7 @@ parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, defau
 args = parser.parse_args()
 
           
-assert os.path.isfile(args.people_file) and os.path.isfile(args.things_file)
+
 
 
 
@@ -94,48 +110,52 @@ def auto_complete(array, default_values):
     array.extend(default_values[len(array):])
     return array
 
-# catch errors of file reading
-try:
-    people = {}
-    for line in open(args.people_file, encoding = 'utf-8'):
-          if not len(line) or line[0] == '#':
-              continue
-          current = line.strip().split()
-          if not len(current):
-                continue
-          if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
-          people[current[0]] = float(current[1]), float(current[2])
-          
-    names = list(people.keys())
+if hasattr(args, people_and_things_file):
+    # "classic" way
+    
+    try: # catch errors of file reading
+        people_file, things_file = args.people_and_things_file
+        assert os.path.isfile(people_file) and os.path.isfile(things_file)
+        people = {}
+        for line in open(people_file, encoding = 'utf-8'):
+              if not len(line) or line[0] == '#':
+                  continue
+              current = line.strip().split()
+              if not len(current):
+                    continue
+              if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
+              people[current[0]] = float(current[1]), float(current[2])
+              
+        names = list(people.keys())
 
-    things = []
-    for line in open(args.things_file, encoding='utf-8'):
-        
-          if not len(line) or line[0] == '#':
-              continue
+        things = []
+        for line in open(things_file, encoding = 'utf-8'):
             
-          current = line.strip().split()
-          
-          if not len(current):
-                continue
-          
-          if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
-          things.append([current[0], float(current[1]),
-                         (None if current[2] == 'None' else current[2]), float(current[3])])
-          
-    for thing in things:
-          assert thing[2] in names or thing[2] == None
-          
-except IndexError:
-    raise SyntaxError('Invalid file input length'
-                      + ('. Try -a option to automaticly add insufficient values.' if not  args.auto_complete else '') +
-                      f' Error in line:\n{line}')
+              if not len(line) or line[0] == '#':
+                  continue
+                
+              current = line.strip().split()
+              
+              if not len(current):
+                    continue
+              
+              if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
+              things.append([current[0], float(current[1]),
+                             (None if current[2] == 'None' else current[2]), float(current[3])])
+              
+        for thing in things:
+              assert thing[2] in names or thing[2] == None
+              
+    except IndexError:
+        raise SyntaxError('Invalid file input length'
+                          + ('. Try -a option to automaticly add insufficient values.' if not  args.auto_complete else '') +
+                          f' Error in line:\n{line}')
 
-except (TypeError, ValueError):
-    raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
+    except (TypeError, ValueError):
+        raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
 
-except AssertionError:
-    raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
+    except AssertionError:
+        raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
 def generate_sequence():
       sequence = {name: [] for name in names}
