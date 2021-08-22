@@ -5,28 +5,36 @@ import yaml
 
 from help import parse
 from tools import *
+import data_classes
 
-
-
-          
-
-args = parse()
+args = parse() # parse all given flags
 
 if hasattr(args, "people_and_things_file"):
-    # "classic" way
+    # "classic", simple way
     
     try: # catch errors of file reading
         people_file, things_file = args.people_and_things_file
         assert os.path.isfile(people_file) and os.path.isfile(things_file)
+        
+    except AssertionError:
+        raise AttributeError('Invalid file')
+     
+    try:
         people = {}
+        data_classes.to_optimize = ['value']
         for line in open(people_file, encoding = 'utf-8'):
               if not len(line) or line[0] == '#':
                   continue
+               
               current = line.strip().split()
               if not len(current):
                     continue
+               
               if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
-              people[current[0]] = float(current[1]), float(current[2])
+              people[current[0]] = data_classes.Person()
+              people[current[0]].name = current[0]
+              people[current[0]].values_optimal     = {'value': float(current[1])}
+              people[current[0]].values_sensitivity = {'value': float(current[2])}
               
         names = list(people.keys())
 
@@ -42,11 +50,16 @@ if hasattr(args, "people_and_things_file"):
                     continue
               
               if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
-              things.append([current[0], float(current[1]),
-                             (None if current[2] == 'None' else current[2]), float(current[3])])
+              things.append(data_classes.Thing())
+              
+              things[-1].name   = current[0]
+              things[-1].values = {'value': float(current[1])}
+              things[-1].owner  = (None if current[2] == 'None' else current[2])
+              things[-1].moral  = float(current[3])
+
               
         for thing in things:
-              assert thing[2] in names or thing[2] == None
+              assert thing.owner in names or thing.owner == None
               
     except IndexError:
         raise SyntaxError('Invalid file input length'
@@ -73,22 +86,26 @@ def generate_sequence():
             sequence[name].append(thing)
       return sequence
 
-def personal_pain(things, person):
+def personal_pain(things, person_name):
 
       # special function is needed to optimize calculating pain from random move
-      pain = sum(thing[3] for thing in things if thing[2] != person)
-            
-      sum_mass = sum([thing[1] for thing in things])
-      good_mass, endurance = people[person]
-      pain += args.pain_multiply * endurance**(sum_mass/good_mass - 1)
+      pain = sum(thing.moral for thing in things if thing.owner != person_name)
+
+      for value_name in data_classes.to_optimize:
+           sum_mass = sum([thing.values[value_name] for thing in things])
+           
+           optimal = people[person_name].values_optimal[value_name]
+           sens    = people[person_name].values_sensitivity[value_name]
+           pain += args.pain_multiply * sens ** (sum_mass/optimal - 1)
+           # TODO: pain_multiply <- file
       return pain
 
 def count_pain(seq):
     
       # needed only for output; optimizing this is senselessly
       pain = 0
-      for person in seq:
-            pain += personal_pain(seq[person], person)
+      for person_name in seq:
+            pain += personal_pain(seq[person_name], person_name)
       return pain
 
 
@@ -131,12 +148,18 @@ def optimized_rand_move(seq, extra_energy):
       
 def printer():
       s = ''
-      for person in sequence:
-            things = sequence[person]
-            sum_mass = sum([thing[1] for thing in things])
-            s1 = '{:<15}'.format(person)
-            s2 = '{:<80}'.format(', '.join(sorted([thing[0] for thing in things])))
-            s3 = f' {round(sum_mass, 5)}/{people[person][0]}'
+      for person_name in sequence:
+            things = sequence[person_name]
+            
+            s1 = '{:<15}'.format(person_name)
+            s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
+            s3 = ' '
+            
+            for value_name in data_classes.to_optimize:
+                 sum_mass = sum([thing.values[value_name] for thing in things])
+                 if value_name != 'value':
+                      s3 += value_name
+                 s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]}'
             
             s += s1 + ':' + s2 + s3 + '\n'
       return s
@@ -176,7 +199,7 @@ else:
       sequence = {name: [] for name in names}
       
       for thing in things:
-            name = thing[2]
+            name = thing.owner
             if name is None:
                   continue
             sequence[name].append(thing)
