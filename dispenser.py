@@ -9,7 +9,7 @@ import data_classes
 
 args = parse() # parse all given flags
 
-if hasattr(args, "people_and_things_file"):
+if args.people_and_things_file != None:
     # "classic", simple way
     
     try: # catch errors of file reading
@@ -36,7 +36,6 @@ if hasattr(args, "people_and_things_file"):
               people[current[0]].values_optimal     = {'value': float(current[1])}
               people[current[0]].values_sensitivity = {'value': float(current[2])}
               
-        names = list(people.keys())
 
         things = []
         for line in open(things_file, encoding = 'utf-8'):
@@ -58,8 +57,6 @@ if hasattr(args, "people_and_things_file"):
               things[-1].moral  = float(current[3])
 
               
-        for thing in things:
-              assert thing.owner in names or thing.owner == None
               
     except IndexError:
         raise SyntaxError('Invalid file input length'
@@ -69,14 +66,41 @@ if hasattr(args, "people_and_things_file"):
     except (TypeError, ValueError):
         raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
 
-    except AssertionError:
-        raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
+elif args.yaml_file != None:
+     assert os.path.isfile(args.yaml_file)
+     import yaml
+     data = yaml.load(open(args.yaml_file, encoding = 'utf-8'), Loader = UniqueKeyLoader)
+     people = {}
+     data_classes.to_optimize = data['optimize']
 
-elif hasattr(args, "yaml_file"):
-     ...
-     
+     for person_name in data['people']:
+          people[person_name] = data_classes.Person()
+          people[person_name].name = person_name
+          
+          for v in data['people'][person_name]:
+               people[person_name].values_optimal[v] = data['people'][person_name][v]['opt']
+               people[person_name].values_sensitivity[v] = data['people'][person_name][v]['sens']
+
+     things = []
+     for thing_name in data['things']:
+          things.append(data_classes.Thing())
+          things[-1].name = thing_name
+          d_thing = data['things'][thing_name]
+          
+          if 'owr' in d_thing:
+               things[-1].owner = d_thing['owr']
+               things[-1].moral = d_thing['mrl']
+          things[-1].values = {v: d_thing[v] if v in d_thing else 0 for v in data_classes.to_optimize}
 else:
      raise AttributeError('No input data provided')
+
+names = list(people.keys())
+
+try:
+     for thing in things:
+              assert thing.owner in names or thing.owner == None
+except AssertionError:
+     raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
 def generate_sequence():
       sequence = {name: [] for name in names}
@@ -159,7 +183,7 @@ def printer():
                  sum_mass = sum([thing.values[value_name] for thing in things])
                  if value_name != 'value':
                       s3 += value_name
-                 s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]}'
+                 s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]} '
             
             s += s1 + ':' + s2 + s3 + '\n'
       return s

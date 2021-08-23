@@ -2,6 +2,7 @@
 import yaml
 import math
 
+
 class UniqueKeyLoader(yaml.SafeLoader):
      def construct_mapping(self, node, deep=False):
          mapping = []
@@ -34,11 +35,15 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
     real_length = int(real_length)
     edge = ['-', '░', '▒', '▓'][int(extra*4)] if (length - real_length - 1 >= 0) else ''
     bar = fill * real_length + edge + '-' * (length - real_length - 1)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = print_end)
+    print(f'{prefix} |{bar}| {percent}% {suffix}', end = print_end)
     
     # Print New Line on Complete
     if iteration == total: 
         print(' '*length*2, end = '\r')
+
+
+
+
 
 def auto_complete(array, default_values):
     "Non-clear function, changes array"
