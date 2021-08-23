@@ -1,7 +1,7 @@
 ---
 optimize:
-  - mass
-  - size # litres?
+  mass: {}
+  size: {pain: 0} # litres?
 
 variables:
   - &high 30

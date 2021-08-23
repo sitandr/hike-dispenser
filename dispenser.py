@@ -9,6 +9,9 @@ import data_classes
 
 args = parse() # parse all given flags
 
+data_classes.Value.pain = args.pain_multiply
+to_optimize_values = {}
+
 if args.people_and_things_file != None:
     # "classic", simple way
     
@@ -21,7 +24,7 @@ if args.people_and_things_file != None:
      
     try:
         people = {}
-        data_classes.to_optimize = ['value']
+        to_optimize_values = {'value': data_classes.Value('value')}
         for line in open(people_file, encoding = 'utf-8'):
               if not len(line) or line[0] == '#':
                   continue
@@ -66,14 +69,26 @@ if args.people_and_things_file != None:
     except (TypeError, ValueError):
         raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
 
+
+
 elif args.yaml_file != None:
+     
      assert os.path.isfile(args.yaml_file)
      import yaml
+     
      data = yaml.load(open(args.yaml_file, encoding = 'utf-8'), Loader = UniqueKeyLoader)
      people = {}
-     data_classes.to_optimize = data['optimize']
+     
+     for v_name in data['optimize'].keys():
+          
+          v = data_classes.Value(v_name)
+          if 'pain' in data['optimize'][v_name]: v.pain = data['optimize'][v_name]['pain']
+          print(v.pain)
+          
+          to_optimize_values[v_name] = v
 
      for person_name in data['people']:
+          
           people[person_name] = data_classes.Person()
           people[person_name].name = person_name
           
@@ -90,7 +105,7 @@ elif args.yaml_file != None:
           if 'owr' in d_thing:
                things[-1].owner = d_thing['owr']
                things[-1].moral = d_thing['mrl']
-          things[-1].values = {v: d_thing[v] if v in d_thing else 0 for v in data_classes.to_optimize}
+          things[-1].values = {v: d_thing[v] if v in d_thing else 0 for v in to_optimize_values}
 else:
      raise AttributeError('No input data provided')
 
@@ -115,12 +130,12 @@ def personal_pain(things, person_name):
       # special function is needed to optimize calculating pain from random move
       pain = sum(thing.moral for thing in things if thing.owner != person_name)
 
-      for value_name in data_classes.to_optimize:
+      for value_name in to_optimize_values:
            sum_mass = sum([thing.values[value_name] for thing in things])
            
            optimal = people[person_name].values_optimal[value_name]
            sens    = people[person_name].values_sensitivity[value_name]
-           pain += args.pain_multiply * sens ** (sum_mass/optimal - 1)
+           pain += to_optimize_values[value_name].pain * sens ** (sum_mass/optimal - 1)
            # TODO: pain_multiply <- file
       return pain
 
@@ -179,7 +194,7 @@ def printer():
             s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
             s3 = ' '
             
-            for value_name in data_classes.to_optimize:
+            for value_name in to_optimize_values:
                  sum_mass = sum([thing.values[value_name] for thing in things])
                  if value_name != 'value':
                       s3 += value_name

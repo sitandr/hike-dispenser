@@ -1,18 +1,24 @@
 # modificated funcs from StackOverFlow
-import yaml
+
 import math
 
+try:
+      import yaml
 
-class UniqueKeyLoader(yaml.SafeLoader):
-     def construct_mapping(self, node, deep=False):
-         mapping = []
-         for key_node, value_node in node.value:
-             key = self.construct_object(key_node, deep=deep)
-             if key in mapping:
-                 raise SyntaxError(f'"{key}" is a duplicated key. Please try to make it different.')
-             mapping.append(key)
-         return super().construct_mapping(node, deep)
-        
+      class UniqueKeyLoader(yaml.SafeLoader):
+           
+           def construct_mapping(self, node, deep=False):
+               mapping = []
+               for key_node, value_node in node.value:
+                   key = self.construct_object(key_node, deep=deep)
+                   if key in mapping:
+                       raise SyntaxError(f'"{key}" is a duplicated key. Please try to make it different.')
+                   mapping.append(key)
+               return super().construct_mapping(node, deep)
+
+except ImportError:
+      print('WARINIG: PyYAML lib not detected, using yaml files is impossible')
+      
 def print_progress_bar (iteration, total, prefix = '', suffix = '',
                         decimals = 1, length = 50, fill = '█', print_end = "\r"):
     """

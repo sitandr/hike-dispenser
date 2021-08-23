@@ -1,7 +1,14 @@
-to_optimize = []
-
+class Value:
+      name = '<undefined value name>'
+      pain = None
+      
+      def __init__(self, name):
+            self.name = name
+      def __repr__(self):
+            return name
+      
 class Person:
-      name = '<undefined name>'
+      name = '<undefined person name>'
       values_optimal = {}
       values_sensitivity = {}
 
@@ -12,7 +19,7 @@ class Person:
                               for v in self.values_sensitivity]))
 
 class Thing:
-      name = '<undefined name>'
+      name = '<undefined thing name>'
       values = {}
       owner = None
       moral = 0
