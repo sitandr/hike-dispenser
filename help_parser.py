@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description='This program dispenses things to p
       to get better result. If you do so, it\'s also recommended to increase gradient proportionally. However, the situation \
       may be different, so it\'s best to modify according to circumstances.')
 
-parser.add_argument('-p', '--people_and_things_files', dest = 'people_and_things_file', nargs = 2, type = str,
+parser.add_argument('-t', '--people_and_things_files', dest = 'people_and_things_file', nargs = 2, type = str,
                     help='Input files with people and thing data,\
                     used with things file instead of yaml')
 
@@ -41,7 +41,7 @@ parser.add_argument('-i', '--iteration_number', dest = 'iteration_number', type=
 parser.add_argument('-g', '--gradient', dest = 'gradient', type=float, default = 100_000,
                     help='Number of iterations it takes to decrease temperature in 10 times; default is 100_000')
 
-parser.add_argument('-t', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
+parser.add_argument('-T', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
                     help='Start temperature; default is 50 (pains)')
 
 parser.add_argument('--pain_multiply', dest = 'pain_multiply', type=float, default = 10,

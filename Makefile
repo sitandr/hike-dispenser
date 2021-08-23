@@ -10,7 +10,6 @@ all: README.md
 
 README.md: src.md build/README_help.md
 	python -c "$(inserter)"
-	#pandoc build/README_full.md -o README.md
 
 build/README_help.md: dispenser.py
 	python dispenser.py -h > build/README_help.md
