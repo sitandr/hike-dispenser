@@ -3,16 +3,21 @@ import os, sys
 
 import yaml
 
-from help import parse
+import help_parser
 from tools import *
 import data_classes
 
-args = parse() # parse all given flags
+default_value_name = 'v'
 
-data_classes.Value.pain = args.pain_multiply
+def default_optimize_values():
+     return {default_value_name: data_classes.Value(default_value_name)}
+
+args = help_parser.parse() # parse all given flags
+
+
 to_optimize_values = {}
 
-if args.people_and_things_file != None:
+if args.people_and_things_file is not None:
     # "classic", simple way
     
     try: # catch errors of file reading
@@ -24,7 +29,10 @@ if args.people_and_things_file != None:
      
     try:
         people = {}
-        to_optimize_values = {'value': data_classes.Value('value')}
+        
+        data_classes.Value.pain = args.pain_multiply
+        to_optimize_values = default_optimize_values()
+        
         for line in open(people_file, encoding = 'utf-8'):
               if not len(line) or line[0] == '#':
                   continue
@@ -36,8 +44,8 @@ if args.people_and_things_file != None:
               if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
               people[current[0]] = data_classes.Person()
               people[current[0]].name = current[0]
-              people[current[0]].values_optimal     = {'value': float(current[1])}
-              people[current[0]].values_sensitivity = {'value': float(current[2])}
+              people[current[0]].values_optimal     = {default_value_name: float(current[1])}
+              people[current[0]].values_sensitivity = {default_value_name: float(current[2])}
               
 
         things = []
@@ -55,7 +63,7 @@ if args.people_and_things_file != None:
               things.append(data_classes.Thing())
               
               things[-1].name   = current[0]
-              things[-1].values = {'value': float(current[1])}
+              things[-1].values = {default_value_name: float(current[1])}
               things[-1].owner  = (None if current[2] == 'None' else current[2])
               things[-1].moral  = float(current[3])
 
@@ -71,21 +79,31 @@ if args.people_and_things_file != None:
 
 
 
-elif args.yaml_file != None:
+elif args.yaml_file is not None:
      
      assert os.path.isfile(args.yaml_file)
      import yaml
      
      data = yaml.load(open(args.yaml_file, encoding = 'utf-8'), Loader = UniqueKeyLoader)
      people = {}
-     
-     for v_name in data['optimize'].keys():
+
+     if 'config' in data:
+          for attribute in data['config']:
+               if help_parser.is_default(args, attribute): # command (args) has more priority
+                    setattr(args, attribute, data['config'][attribute])
+               
+     data_classes.Value.pain = args.pain_multiply
+
+     if 'optimize' in data:
+          for v_name in data['optimize'].keys():
+               
+               v = data_classes.Value(v_name)
+               if 'pain' in data['optimize'][v_name]: v.pain = data['optimize'][v_name]['pain']
+
+               to_optimize_values[v_name] = v
+     else:
+          to_optimize_values[v_name] = default_optimize_values()
           
-          v = data_classes.Value(v_name)
-          if 'pain' in data['optimize'][v_name]: v.pain = data['optimize'][v_name]['pain']
-
-          to_optimize_values[v_name] = v
-
      for person_name in data['people']:
           
           people[person_name] = data_classes.Person()
@@ -195,7 +213,7 @@ def printer():
             
             for value_name in to_optimize_values:
                  sum_mass = sum([thing.values[value_name] for thing in things])
-                 if value_name != 'value':
+                 if value_name != default_value_name:
                       s3 += value_name
                  s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]} '
             

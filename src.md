@@ -10,7 +10,9 @@ box. It uses annealing and... that's all.
 
 ## Usage
 
-As required input it takes files with people description and things.
+There are two different types of input data. 
+
+First, As required input it takes files with people description and things.
 Both files should contain text with line = one person/thing. Empty lines
 or comments (start with «\#») are possible.
 
