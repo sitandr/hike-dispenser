@@ -1,7 +1,10 @@
 ---
+config:
+  iteration_number: 200_000 # quite easy, don't give too much time
+
 optimize:
   mass: {}
-  size: {pain: 0} # litres?
+  size: {pain: 3} # not so important
 
 variables:
   - &high 30

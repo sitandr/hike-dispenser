@@ -83,8 +83,7 @@ elif args.yaml_file != None:
           
           v = data_classes.Value(v_name)
           if 'pain' in data['optimize'][v_name]: v.pain = data['optimize'][v_name]['pain']
-          print(v.pain)
-          
+
           to_optimize_values[v_name] = v
 
      for person_name in data['people']:

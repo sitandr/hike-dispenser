@@ -29,7 +29,7 @@ def parse():
                           help='Print total pain and temperature instead of progress bars')
 
       parser.add_argument('-a', '--auto_complete', dest = 'auto_complete', action='store_true',
-                          help='Allows not full completed data files; people are auto-completed with 10 optimal_weight \
+                          help='Allows not full completed text data files; people are auto-completed with 10 optimal_weight \
                                   and 10 sensevity; things have 1 kg mass and don\'t belong to anybody.')
 
       parser.add_argument('-d', '--disable_progress_info', dest = 'disable_progress_info', action='store_true',
