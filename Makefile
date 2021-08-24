@@ -1,5 +1,5 @@
 
-define inserter
+define INSERTER
 s = open('build/README_help.md').read();\
 s = s[s.find('optional arguments:') + 19:];\
 s2 = open('src.md').read();\
@@ -9,7 +9,7 @@ endef
 all: README.md
 
 README.md: src.md build/README_help.md
-	python -c "$(inserter)"
+	python -c "$(INSERTER)"
 
 build/README_help.md: dispenser.py
 	python dispenser.py -h > build/README_help.md

@@ -2,6 +2,10 @@
 
 This little program is created to help with planning a group hiking trip. One of the problems is distribution of cargo, such as tents, axes, pots, food, guitars e.t.c. The problem becomes more complicated due to need of transfer if cargo isn't carried by it's owner, various cargo capacities (by mass) and weight sensitivity of different people. This command line tool provides ready (although non-ideal) solution out of box. It uses annealing and... that's all.
 
+## Theory
+
+The value that is optimized is "pain". To count it, the program assumes that it is exponentially over weight increasing. That helps to strictly limit overload on some persons.
+
 ## Usage
 
 ### Plain text 
@@ -39,7 +43,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 3. Command:
 
-`python dispenser.py [OPTIONS] -t <people file> <things file>`
+`python dispenser.py -t <people file> <things file> [OPTIONS]`
 
 ### YAML
 
@@ -130,7 +134,9 @@ things:
     mrl: 50
 ```
 
+Command:
 
+`python dispenser.py -y <yaml file> [OPTIONS]`
 
 ## Options
 
@@ -165,24 +171,25 @@ The full list:
                         in 10 times; default is 100_000
   -T START_TEMPERATURE, --start_temperature START_TEMPERATURE
                         Start temperature; default is 50 (pains)
-  --pain_multiply PAIN_MULTIPLY
-                        Default pain (at optimal weight); default is 10
   -u UPDATE_FREQ, --update_freq UPDATE_FREQ
                         Number of iterations between updating bar/log; default
                         is 1_000
+  --pain_multiply PAIN_MULTIPLY
+                        Default pain (at optimal weight); default is 10
+  --opt_default OPT_DEFAULT
+                        Default optimal value; default is 10
+  --sens_default SENS_DEFAULT
+                        Default optimal value; default is 10
 
 ```
 
 Using examples from `tests/` :
 
- `python dispenser.py -t tests/p.txt tests/t.txt`
+ `python dispenser.py -t tests/p.txt tests/t.txt [OPTIONS]`
 
 Or, using `YAML`:
 
-`python dispenser.py -y tests/multi_test.yaml`
+`python dispenser.py -y tests/multi_test.yaml [OPTIONS]`
 
-## Theory
 
-The value that is optimized is "pain". To count it, the program assumes
-that it is exponentially over weight increasing. That helps to strictly
-limit extra weights.
+

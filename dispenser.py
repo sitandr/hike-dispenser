@@ -16,6 +16,7 @@ args = help_parser.parse() # parse all given flags
 
 
 to_optimize_values = {}
+enable_inacs = False # inaccessibility, slightly decreases speed, so should be tracked
 
 if args.people_and_things_file is not None:
     # "classic", simple way
@@ -109,9 +110,13 @@ elif args.yaml_file is not None:
           people[person_name] = data_classes.Person()
           people[person_name].name = person_name
           
+          if 'inacs' in data['people'][person_name]:
+               people[person_name].inaccessability = data['people'][person_name]['inacs']
+               enable_inacs = True
+               
           for v in to_optimize_values:
                current_p = data['people'][person_name]
-               
+                                   
                people[person_name].values_optimal[v] = (current_p[v]['opt']
                                                         if (v in current_p and 'opt' in current_p[v]) else
                                                         args.opt_default)
@@ -138,6 +143,7 @@ names = list(people.keys())
 try:
      for thing in things:
               assert thing.owner in names or thing.owner == None
+              
 except AssertionError:
      raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
@@ -153,6 +159,7 @@ def personal_pain(things, person_name):
 
       # special function is needed to optimize calculating pain from random move
       pain = sum(thing.moral for thing in things if thing.owner != person_name)
+      
 
       for value_name in to_optimize_values:
            sum_mass = sum([thing.values[value_name] for thing in things])
@@ -227,6 +234,16 @@ def printer():
             s += s1 + ':' + s2 + s3 + '\n'
       return s
 
+# needed for meeting calculation
+
+start_sequence = {name: [] for name in names}
+
+for thing in things:
+     name = thing.owner
+     if name is None:
+          continue
+     start_sequence[name].append(thing)
+            
 all_text = ''
 if not args.print_own:
       for attempt in range(args.epoch_number):
@@ -259,13 +276,7 @@ if not args.print_own:
             
 else:
       # print just owners
-      sequence = {name: [] for name in names}
-      
-      for thing in things:
-            name = thing.owner
-            if name is None:
-                  continue
-            sequence[name].append(thing)
+      sequence = start_sequence
       
       if args.output_file:
           all_text += printer()

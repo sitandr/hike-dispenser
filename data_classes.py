@@ -9,7 +9,8 @@ class Value:
       
 class Person:
       name = '<undefined person name>'
-
+      inaccessibility = 0
+      
       def __init__(self):
             self.values_optimal = {}
             self.values_sensitivity = {}
