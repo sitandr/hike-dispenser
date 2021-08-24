@@ -103,16 +103,23 @@ elif args.yaml_file is not None:
                to_optimize_values[v_name] = v
      else:
           to_optimize_values[v_name] = default_optimize_values()
-          
+
      for person_name in data['people']:
           
           people[person_name] = data_classes.Person()
           people[person_name].name = person_name
           
-          for v in data['people'][person_name]:
-               people[person_name].values_optimal[v] = data['people'][person_name][v]['opt']
-               people[person_name].values_sensitivity[v] = data['people'][person_name][v]['sens']
-
+          for v in to_optimize_values:
+               current_p = data['people'][person_name]
+               
+               people[person_name].values_optimal[v] = (current_p[v]['opt']
+                                                        if (v in current_p and 'opt' in current_p[v]) else
+                                                        args.opt_default)
+               
+               people[person_name].values_sensitivity[v] = (current_p[v]['sens']
+                                                            if (v in current_p and 'sens' in current_p[v]) else
+                                                             args.sens_default)
+          
      things = []
      for thing_name in data['things']:
           things.append(data_classes.Thing())

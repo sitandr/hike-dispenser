@@ -44,11 +44,17 @@ parser.add_argument('-g', '--gradient', dest = 'gradient', type=float, default =
 parser.add_argument('-T', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
                     help='Start temperature; default is 50 (pains)')
 
+parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
+                    help='Number of iterations between updating bar/log; default is 1_000')
+
 parser.add_argument('--pain_multiply', dest = 'pain_multiply', type=float, default = 10,
                     help='Default pain (at optimal weight); default is 10')
 
-parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
-                    help='Number of iterations between updating bar/log; default is 1_000')
+parser.add_argument('--opt_default', dest = 'opt_default', type=float, default = 10,
+                    help='Default optimal value; default is 10')
+
+parser.add_argument('--sens_default', dest = 'sens_default', type=float, default = 10,
+                    help='Default optimal value; default is 10')
 
 def parse():
       # parse part

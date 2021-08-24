@@ -1,6 +1,7 @@
 ---
 config:
   iteration_number: 200_000 # quite easy, don't give too much time
+  opt_default: 7
 
 optimize:
   mass: {}
@@ -31,7 +32,6 @@ people:
    size: *n_size
 
  Андрей_Е.:
-   mass: {opt: 7, sens: 10}
    size: *n_size
 
  Амир:

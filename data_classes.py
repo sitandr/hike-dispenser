@@ -5,17 +5,18 @@ class Value:
       def __init__(self, name):
             self.name = name
       def __repr__(self):
-            return name
+            return self.name
       
 class Person:
       name = '<undefined person name>'
-      values_optimal = {}
-      values_sensitivity = {}
 
+      def __init__(self):
+            self.values_optimal = {}
+            self.values_sensitivity = {}
       def __repr__(self):
-            return ((self.name) + ' optimal '.join([v + ': ' + str(self.values_optimal[v])
+            return ((self.name) + ' optimal ' + ' '.join([v + ': ' + str(self.values_optimal[v])
                               for v in self.values_optimal])
-                  + ' sens '.join([v + ': ' + str(self.values_sensitivity[v])
+                  + ' sens ' + ' '.join([v + ': ' + str(self.values_sensitivity[v])
                               for v in self.values_sensitivity]))
 
 class Thing:
