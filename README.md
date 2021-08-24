@@ -16,7 +16,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
    
    Alice	 5   15
    Bob   	 7   10
-   Superman 100 3
+   Superman 100 20
    
    # 		(kg)
    ```
@@ -28,12 +28,13 @@ First, it can be a plain text file. In this case it is impossible to use major p
    # then it's owner and moral pain if it is carried by someone else 
    # (for ex. Alice don't want to leave guitar)
    
+   Spaghetti   1   None	 0
    Rice		2	Bob    	 0
    Guitar 	 	5   Alice  	 7
    Tent		5   Alice  	 1
    Supweapon  50	Superman 50
    
-   #		   (kg)
+   #		  (kg)
    ```
 
 3. Command:
@@ -42,9 +43,96 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 ### YAML
 
-`YAML` is a user-friendly data format  
+`YAML` is a human-friendly data format with lots of features that could be used as input for this program. Usage of YAML allows using anchors, inheritance, infinities e.t.c. Full syntax description: [Wiki](https://en.wikipedia.org/wiki/YAML#Syntax), [Official spec](http://yaml.org/spec/1.2/spec.html). This input format will be further developed, whereas plain text cannot support more features (cost is too high). Currently, root chapters are (this order is recommended, but not necessary):
 
-### Options
+1. **Config** (optional)
+
+   ​	There you can specify any command line options that will be used by default. However, it can be still overridden by directly command line.
+
+   `config: <option name>: <option value>`
+
+2.  **Optimize** (optional)
+
+   ​	Specifies parameters that should be optimized (*global values*). It must be dictionary with keys that are names of optimized and values (also dicts) that specify it characteristics. If not specified, **v** (value) only is used at default parameters. Currently available:
+
+   1. **Pain** (multiply) specially for this parameter, default is 10 (look at `pain_multiply` in *Options*). Can be used to set priorities of pain.
+
+   `optimize: <global value name>: <parameter name>: <parameter value>`
+
+3. **Variables** (optional)
+
+   ​	This chapter hasn't any function by itself. However, it **can** be used to set YAML anchors without any risk of undesirable effects.
+
+   `variables: - &<var name>: <var value>`
+
+4. **People** (required)
+
+   ​	Replacement for *people* file. Names are keys, values are *global variables* or special parameters. For each *global value* **must** be specified `opt` (optimal value) and `sens` (sensitivity).
+
+   `people: <name>: {<global variable>: {opt: <optimal global value>, sens: <sensitivity>}, {<special parameters name>: <special parameter value>}}`
+
+5. **Things** (required)
+
+   ​	Replacement for *values* file. Thing names are keys, for each *global value* **can** be specified this thing value, default is *0*. Also can be specified `owr` (owner of this thing, if no, **None** is used). And `mrl` (moral pain gained when is carried by someone else).
+
+   `things: <thing name>: {<global variable>: <value>, [owr: <owner name>, mrl: <moral pain>]}`
+
+Example of full file:
+
+```yaml
+config:
+  iteration_number: 200_000 # too easy
+  update_freq:	      3_000 # don't need much log
+
+optimize:
+  mass: {}
+  size: {pain: 3} # less priority
+
+people:
+  Alice:
+    mass: {opt: 5,  sens: 15} # small weight
+    size: {opt: 10, sens: 10} # but large backpack
+    
+  Bob:
+    mass: {opt: 7,  sens: 10} # more strength
+    size: {opt: 7,  sens: 20} # but less backpack size
+    
+  Superman:
+    mass: {opt: 100, sens: 20} # superweight
+    size: {opt:  20, sens: 30} # but not so big backpack
+
+things:
+  Spaghetti: # don't belong to anybody
+    mass: 1
+    size: 1
+    
+  Rice:
+    mass: 2
+    size: 1
+    own: Bob
+    mrl: 0
+    
+  Guitar: # don't take place in backpack, size = 0, default
+    mass: 5
+    own: Alice
+    mrl: 7
+    
+  Tent:
+    mass: 5
+    size: 5
+    own: Alice
+    mrl: 1
+    
+  Supweapon:
+    mass: 50
+    size: 15
+    own: Superman
+    mrl: 50
+```
+
+
+
+## Options
 
 The full list:
 
@@ -93,7 +181,7 @@ Or, using `YAML`:
 
 `python dispenser.py -y tests/multi_test.yaml`
 
-### Theory
+## Theory
 
 The value that is optimized is "pain". To count it, the program assumes
 that it is exponentially over weight increasing. That helps to strictly

@@ -2,6 +2,10 @@
 
 This little program is created to help with planning a group hiking trip. One of the problems is distribution of cargo, such as tents, axes, pots, food, guitars e.t.c. The problem becomes more complicated due to need of transfer if cargo isn't carried by it's owner, various cargo capacities (by mass) and weight sensitivity of different people. This command line tool provides ready (although non-ideal) solution out of box. It uses annealing and... that's all.
 
+## Theory
+
+The value that is optimized is "pain". To count it, the program assumes that it is exponentially over weight increasing. That helps to strictly limit overload on some persons.
+
 ## Usage
 
 ### Plain text 
@@ -16,7 +20,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
    
    Alice	 5   15
    Bob   	 7   10
-   Superman 100 3
+   Superman 100 20
    
    # 		(kg)
    ```
@@ -28,6 +32,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
    # then it's owner and moral pain if it is carried by someone else 
    # (for ex. Alice don't want to leave guitar)
    
+   Spaghetti   1   None	 0
    Rice		2	Bob    	 0
    Guitar 	 	5   Alice  	 7
    Tent		5   Alice  	 1
@@ -38,7 +43,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 3. Command:
 
-`python dispenser.py [OPTIONS] -t <people file> <things file>`
+`python dispenser.py -t <people file> <things file> [OPTIONS]`
 
 ### YAML
 
@@ -52,7 +57,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 2.  **Optimize** (optional)
 
-   ​	Specifies parameters that should be optimized (*global values*). It must be dictionary with keys that are names of optimized and values (also dicts) that specify it characteristics. Currently available:
+   ​	Specifies parameters that should be optimized (*global values*). It must be dictionary with keys that are names of optimized and values (also dicts) that specify it characteristics. If not specified, **v** (value) only is used at default parameters. Currently available:
 
    1. **Pain** (multiply) specially for this parameter, default is 10 (look at `pain_multiply` in *Options*). Can be used to set priorities of pain.
 
@@ -80,10 +85,58 @@ Example of full file:
 
 ```yaml
 config:
- 
+  iteration_number: 200_000 # too easy
+  update_freq:	      3_000 # don't need much log
+
+optimize:
+  mass: {}
+  size: {pain: 3} # less priority
+
+people:
+  Alice:
+    mass: {opt: 5,  sens: 15} # small weight
+    size: {opt: 10, sens: 10} # but large backpack
+    
+  Bob:
+    mass: {opt: 7,  sens: 10} # more strength
+    size: {opt: 7,  sens: 20} # but less backpack size
+    
+  Superman:
+    mass: {opt: 100, sens: 20} # superweight
+    size: {opt:  20, sens: 30} # but not so big backpack
+
+things:
+  Spaghetti: # don't belong to anybody
+    mass: 1
+    size: 1
+    
+  Rice:
+    mass: 2
+    size: 1
+    own: Bob
+    mrl: 0
+    
+  Guitar: # don't take place in backpack, size = 0, default
+    mass: 5
+    own: Alice
+    mrl: 7
+    
+  Tent:
+    mass: 5
+    size: 5
+    own: Alice
+    mrl: 1
+    
+  Supweapon:
+    mass: 50
+    size: 15
+    own: Superman
+    mrl: 50
 ```
 
+Command:
 
+`python dispenser.py -y <yaml file> [OPTIONS]`
 
 ## Options
 
@@ -95,14 +148,11 @@ place_where_should_be_help_inserted
 
 Using examples from `tests/` :
 
- `python dispenser.py -t tests/p.txt tests/t.txt`
+ `python dispenser.py -t tests/p.txt tests/t.txt [OPTIONS]`
 
 Or, using `YAML`:
 
-`python dispenser.py -y tests/multi_test.yaml`
+`python dispenser.py -y tests/multi_test.yaml [OPTIONS]`
 
-## Theory
 
-The value that is optimized is "pain". To count it, the program assumes
-that it is exponentially over weight increasing. That helps to strictly
-limit extra weights.
+
