@@ -9,7 +9,7 @@ class Value:
       
 class Person:
       name = '<undefined person name>'
-      inaccessibility = 0
+      inaccessibility = 1
       
       def __init__(self):
             self.values_optimal = {}

@@ -99,7 +99,6 @@ def read_data(args):
                 
                 if 'inacs' in data['people'][person_name]:
                      people[person_name].inaccessability = data['people'][person_name]['inacs']
-                     enable_inacs = True
                      
                 for v in to_optimize_values:
                      current_p = data['people'][person_name]
