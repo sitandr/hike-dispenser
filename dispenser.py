@@ -60,15 +60,6 @@ def print_haul(seq):
             s += s1 + ':' + s2 + s3 + '\n'
       return s
 
-# needed for meeting calculation
-
-start_sequence = {name: [] for name in names}
-
-for thing in things:
-     name = thing.owner
-     if name is None:
-          continue
-     start_sequence[name].append(thing)
             
 all_text = ''
 
@@ -115,12 +106,19 @@ if not args.print_own:
             
 else:
       # print just owners
-      sequence = start_sequence
+
+      start_sequence = {name: [] for name in names}
+
+      for thing in things:
+          name = thing.owner
+          if name is None:
+               continue
+          start_sequence[name].append(thing)
       
       if args.output_file:
-          all_text += print_haul(sequence)
+          all_text += print_haul(start_sequence)
       else:
-          print(print_haul(sequence))
+          print(print_haul(start_sequence))
 
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
