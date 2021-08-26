@@ -5,6 +5,10 @@ from tools import *
 import data_classes
 import data_reader
 
+import time
+
+t1 = time.time()
+
 default_value_name = 'v'
 
 def default_optimize_values():
@@ -13,7 +17,7 @@ def default_optimize_values():
 args = help_parser.parse() # parse all given flags
 people, things, to_optimize_values = data_reader.read_data(args)
 
-enable_inacs = any([people[p].inaccessibility for p in people]) # inaccessibility, slightly decreases speed, so should be tracked
+enable_inacs = False #any([people[p].inaccessibility for p in people]) # inaccessibility, slightly decreases speed, so should be tracked
 
 names = list(people.keys())
 
@@ -28,15 +32,13 @@ except AssertionError:
 
 def generate_transfer_from_seqence(seq):
      # very slow
-     all_transfer = {(n1, n2): [[],[]] for n1 in names for n2 in names if n1 < n2}
-     # first is what FIRST GIVES (and second takes), second — what second gives
+     all_transfer = {(n1, n2): [] for n1 in names for n2 in names}
+     # what FIRST GIVES (and second takes)
      for to in seq:
           for thing in seq[to]:
                if thing.owner is not None and thing.owner != to:
-                    if thing.owner < to:
-                         all_transfer[thing.owner, to][0].append(thing) # owner GIVES
-                    else:
-                         all_transfer[to, thing.owner][1].append(thing) # to TAKES
+                    all_transfer[thing.owner, to].append(thing) # owner GIVES
+                    
      return all_transfer
 
 def generate_sequence():
@@ -70,26 +72,23 @@ def count_pain(seq):
             pain += personal_pain(seq[person_name], person_name)
       return pain
 
-def tuple_sort(a, b):
-     return (a, b) if a<=b else (b,a)
-
-def transfer_move(thing, from_, to_):
+def transfer_move(thing, from_, to_): # TODO!!!!: DELETE THIS "[[],[]]" and create symmetric table
       if thing.owner is None: return 0
       add_energy = 0
 
       if thing.owner != from_:
-            print(transfer, thing, tuple_sort(thing.owner, from_))
-            transfer[tuple_sort(thing.owner, from_)].remove(thing) # TODO: owner = from ?
+            # print(transfer, thing, thing.owner, from_)
+            transfer[thing.owner, from_].remove(thing) # TODO: owner = from ?
        
-            if not any(transfer[tuple_sort(thing.owner, from_p)]): # removed all, transfer is deleted -> good
-                 add_energy -= from_p.inaccessibility + thing.owner.inaccessibility
+            if not (transfer[thing.owner, from_] or transfer[from_, thing.owner]): # removed all, transfer is deleted -> good
+                 add_energy -= people[from_].inaccessibility + people[thing.owner].inaccessibility
                  
       if thing.owner != to_:
             
-            if not any(transfer[tuple_sort(thing.owner, to_)]): # before addition was empty; transfer created -> bad
-                 add_energy += to_.inaccessibility    + thing.owner.inaccessibility
+            if not (transfer[thing.owner, to_] or transfer[to_, thing.owner]): # before addition was empty; transfer created -> bad
+                 add_energy += people[to_].inaccessibility    + people[thing.owner].inaccessibility
             # weight decrease?
-            transfer[tuple_sort(thing.owner, to_)].append(thing)
+            transfer[thing.owner, to_].append(thing)
       return add_energy
                  
 def optimized_rand_move(seq, extra_energy):
@@ -139,11 +138,28 @@ def optimized_rand_move(seq, extra_energy):
 
       if final_energy + extra_energy + add_energy > start_energy:
             reverse()
-      
-def printer():
+
+def print_meet(seq):
+     s = ''
+
+     for person_name in seq:
+          s += person_name + ' :\n'
+
+          for to_p in seq:
+               if to_p >= person_name:
+                    continue
+               
+               if transfer[person_name, to_p]:
+                    s += f'\t-> {to_p} ' + ' '.join([t.name for t in transfer[person_name, to_p]]) + '\n'
+               
+               if transfer[to_p, person_name]:
+                    s += f'\t {to_p}->' + ' '.join([t.name for t in transfer[to_p, person_name]]) + '\n'
+     return s
+
+def print_haul(seq):
       s = ''
-      for person_name in sequence:
-            things = sequence[person_name]
+      for person_name in seq:
+            things = seq[person_name]
             
             s1 = '{:<15}'.format(person_name)
             s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
@@ -194,7 +210,10 @@ if not args.print_own:
                  print_progress_bar(args.iteration_number, args.iteration_number)
                  
             text = (f'\nAttempt {attempt + 1}. Total pain: {count_pain(sequence)}. Full info:\n'
-                    + printer())
+                    + print_haul(sequence))
+
+            if enable_inacs:
+                 text += '\n' + print_meet(sequence)
             
             if args.output_file:
                   all_text += text
@@ -206,9 +225,11 @@ else:
       sequence = start_sequence
       
       if args.output_file:
-          all_text += printer()
+          all_text += print_haul(sequence)
       else:
-          print(printer())
+          print(print_haul(sequence))
 
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
+
+print(time.time() - t1)
