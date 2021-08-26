@@ -7,17 +7,13 @@ import data_reader
 
 import time
 
-t1 = time.time()
-
-default_value_name = 'v'
-
-def default_optimize_values():
-     return {default_value_name: data_classes.Value(default_value_name)}
+t_s = time.time()
 
 args = help_parser.parse() # parse all given flags
 people, things, to_optimize_values = data_reader.read_data(args)
 
-enable_inacs = False #any([people[p].inaccessibility for p in people]) # inaccessibility, slightly decreases speed, so should be tracked
+enable_inacs = any([people[p].inaccessibility for p in people])
+# inaccessibility, slightly decreases speed, so should be tracked
 
 names = list(people.keys())
 
@@ -72,13 +68,12 @@ def count_pain(seq):
             pain += personal_pain(seq[person_name], person_name)
       return pain
 
-def transfer_move(thing, from_, to_): # TODO!!!!: DELETE THIS "[[],[]]" and create symmetric table
+def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
       add_energy = 0
 
       if thing.owner != from_:
-            # print(transfer, thing, thing.owner, from_)
-            transfer[thing.owner, from_].remove(thing) # TODO: owner = from ?
+            transfer[thing.owner, from_].remove(thing)
        
             if not (transfer[thing.owner, from_] or transfer[from_, thing.owner]): # removed all, transfer is deleted -> good
                  add_energy -= people[from_].inaccessibility + people[thing.owner].inaccessibility
@@ -87,11 +82,10 @@ def transfer_move(thing, from_, to_): # TODO!!!!: DELETE THIS "[[],[]]" and crea
             
             if not (transfer[thing.owner, to_] or transfer[to_, thing.owner]): # before addition was empty; transfer created -> bad
                  add_energy += people[to_].inaccessibility    + people[thing.owner].inaccessibility
-            # weight decrease?
             transfer[thing.owner, to_].append(thing)
       return add_energy
                  
-def optimized_rand_move(seq, extra_energy):
+def optimized_rand_move(transfer, seq, extra_energy):
     
       from_p, to_p = random.sample(names, 2)
       things_from, things_to = seq[from_p], seq[to_p]
@@ -112,8 +106,8 @@ def optimized_rand_move(seq, extra_energy):
             # swap
             thing_to = random.randrange(len(things_to))
             if enable_inacs:
-                  add_energy += transfer_move(things_from[thing_from], from_p, to_p)
-                  add_energy += transfer_move(things_to[thing_to], to_p, from_p)
+                  add_energy += transfer_move(transfer, things_from[thing_from], from_p, to_p)
+                  add_energy += transfer_move(transfer, things_to[thing_to], to_p, from_p)
             things_from[thing_from], things_to[thing_to] = (things_to[thing_to],
                                                             things_from[thing_from])
             
@@ -121,16 +115,16 @@ def optimized_rand_move(seq, extra_energy):
                   things_from[thing_from], things_to[thing_to] = (things_to[thing_to],
                                                             things_from[thing_from])
                   if enable_inacs:
-                       transfer_move(things_from[thing_from], to_p, from_p)
-                       transfer_move(things_to[thing_to], from_p, to_p)
+                       transfer_move(transfer, things_from[thing_from], to_p, from_p)
+                       transfer_move(transfer, things_to[thing_to],     from_p, to_p)
       else:
             # move
             thing = things_from.pop(thing_from)
             things_to.append(thing)
-            if enable_inacs: add_energy += transfer_move(thing, from_p, to_p)
+            if enable_inacs: add_energy += transfer_move(transfer, thing, from_p, to_p)
                  
             def reverse():
-                  if enable_inacs: transfer_move(thing, to_p, from_p)
+                  if enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
                   
       final_energy = (personal_pain(things_from, from_p) +
@@ -167,7 +161,7 @@ def print_haul(seq):
             
             for value_name in to_optimize_values:
                  sum_mass = sum([thing.values[value_name] for thing in things])
-                 if value_name != default_value_name:
+                 if value_name != args.v_name_default:
                       s3 += value_name
                  s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]} '
             
@@ -196,7 +190,7 @@ if not args.print_own:
                   
             for i in range(args.iteration_number):
                   T = args.start_temperature*10**(-i/args.gradient)
-                  optimized_rand_move(sequence, T*random.random())
+                  optimized_rand_move(transfer, sequence, T*random.random())
                         
                   if not i%args.update_freq:
                         if args.print_log:
@@ -232,4 +226,4 @@ else:
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
 
-print(time.time() - t1)
+print(time.time() - t_s)

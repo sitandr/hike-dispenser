@@ -56,6 +56,9 @@ parser.add_argument('--opt_default', dest = 'opt_default', type=float, default =
 parser.add_argument('--sens_default', dest = 'sens_default', type=float, default = 10,
                     help='Default optimal value; default is 10')
 
+parser.add_argument('--v_name_default', dest = 'v_name_default', type=str, default = 'v',
+                    help='Default value name; default is "v"')
+
 def parse():
       # parse part
       return parser.parse_args()

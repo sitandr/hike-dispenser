@@ -4,6 +4,8 @@ from tools import *
 import help_parser
 
 def read_data(args):
+      def default_optimize_values():
+            return {args.v_name_default: data_classes.Value(args.v_name_default)}
       to_optimize_values = {}
       if args.people_and_things_file is not None:
           # "classic", simple way
@@ -32,8 +34,8 @@ def read_data(args):
                     if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
                     people[current[0]] = data_classes.Person()
                     people[current[0]].name = current[0]
-                    people[current[0]].values_optimal     = {default_value_name: float(current[1])}
-                    people[current[0]].values_sensitivity = {default_value_name: float(current[2])}
+                    people[current[0]].values_optimal     = {args.v_name_default: float(current[1])}
+                    people[current[0]].values_sensitivity = {args.v_name_default: float(current[2])}
                     
 
               things = []
@@ -51,7 +53,7 @@ def read_data(args):
                     things.append(data_classes.Thing())
                     
                     things[-1].name   = current[0]
-                    things[-1].values = {default_value_name: float(current[1])}
+                    things[-1].values = {args.v_name_default: float(current[1])}
                     things[-1].owner  = (None if current[2] == 'None' else current[2])
                     things[-1].moral  = float(current[3])
 
