@@ -60,8 +60,15 @@ def print_haul(seq):
             s += s1 + ':' + s2 + s3 + '\n'
       return s
 
+
             
-all_text = ''
+
+# create "out" func that would work as file/print output
+if args.output_file:
+     all_text = ''
+     def out(t): global all_text; all_text += t
+else:
+     out = print
 
 optimize.names = names
 optimize.people = people
@@ -96,13 +103,10 @@ if not args.print_own:
             text = (f'\nAttempt {attempt + 1}. Total pain: {optimize.count_pain(sequence)}. Full info:\n'
                     + print_haul(sequence))
 
-            if enable_inacs:
+            if args.meeting_print:
                  text += '\n' + print_meet(sequence)
             
-            if args.output_file:
-                  all_text += text
-            else:
-                  print(text)
+            out(text)
             
 else:
       # print just owners
@@ -115,10 +119,7 @@ else:
                continue
           start_sequence[name].append(thing)
       
-      if args.output_file:
-          all_text += print_haul(start_sequence)
-      else:
-          print(print_haul(start_sequence))
+      out(print_haul(start_sequence))
 
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
