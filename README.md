@@ -73,6 +73,10 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
    ​	Replacement for *people* file. Names are keys, values are *global variables* or special parameters. For each *global value* **must** be specified `opt` (optimal value) and `sens` (sensitivity).
 
+   Currently available special parameters:
+
+   1. **Inaccessibility**. Highly recommended for *transfer model* (hike planning where you need to directly meet and transfer things to other participants). Marks how much pain the person receives when participates in meeting. However, non-zero values also turn on additional structures for pain calculation, and therefore decrease speed at *~20%* (no matters how many values are non-zero).
+
    `people: <name>: {<global variable>: {opt: <optimal global value>, sens: <sensitivity>}, {<special parameters name>: <special parameter value>}}`
 
 5. **Things** (required)
@@ -104,6 +108,7 @@ people:
   Superman:
     mass: {opt: 100, sens: 20} # superweight
     size: {opt:  20, sens: 30} # but not so big backpack
+    inaccessibility: 10 # don't want to spend time for meetings
 
 things:
   Spaghetti: # don't belong to anybody
@@ -153,33 +158,39 @@ The full list:
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Output file; if not specified, stdout is used
   -w, --print_own       Print just current owners; useful for an overview
+  -m, --meeting_print   Print all transfer ways
+  -i INACCESSABILITY_DEFAULT, --inaccessability_default INACCESSABILITY_DEFAULT
+                        Default inaccessability; default is 0; adding any
+                        inaccessability decreases speed at ~20%
   -l, --print_log       Print total pain and temperature instead of progress
                         bars
-  -a, --auto_complete   Allows not full completed text data files; people are
+  -d, --disable_progress_info
+                        No progress info
+  -u UPDATE_FREQ, --update_freq UPDATE_FREQ
+                        Number of iterations between updating bar/log; default
+                        is 1_000
+  -a, --auto_complete   Allows not full completed TEXT data files; people are
                         auto-completed with 10 optimal_weight and 10
                         sensevity; things have 1 kg mass and don't belong to
                         anybody.
-  -d, --disable_progress_info
-                        No progress info
-  -e EPOCH_NUMBER, --epoch_number EPOCH_NUMBER
+  -E EPOCH_NUMBER, --epoch_number EPOCH_NUMBER
                         Default number of general attempts; default is 3
-  -i ITERATION_NUMBER, --iteration_number ITERATION_NUMBER
+  -I ITERATION_NUMBER, --iteration_number ITERATION_NUMBER
                         Default number of iteration in each attempt; if not
                         specified, equals to 300_000
-  -g GRADIENT, --gradient GRADIENT
+  -G GRADIENT, --gradient GRADIENT
                         Number of iterations it takes to decrease temperature
                         in 10 times; default is 100_000
   -T START_TEMPERATURE, --start_temperature START_TEMPERATURE
                         Start temperature; default is 50 (pains)
-  -u UPDATE_FREQ, --update_freq UPDATE_FREQ
-                        Number of iterations between updating bar/log; default
-                        is 1_000
   --pain_multiply PAIN_MULTIPLY
                         Default pain (at optimal weight); default is 10
   --opt_default OPT_DEFAULT
                         Default optimal value; default is 10
   --sens_default SENS_DEFAULT
                         Default optimal value; default is 10
+  --v_name_default V_NAME_DEFAULT
+                        Default value name; default is «v»
 
 ```
 

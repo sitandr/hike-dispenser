@@ -2,8 +2,8 @@
 define INSERTER
 s = open('build/README_help.md').read();\
 s = s[s.find('optional arguments:') + 19:];\
-s2 = open('src.md').read();\
-open('README.md', 'w').write(s2.replace('place_where_should_be_help_inserted', s, 1))
+s2 = open('src.md', encoding = 'utf-8').read();\
+open('README.md', 'w', encoding = 'utf-8').write(s2.replace('place_where_should_be_help_inserted', s, 1))
 endef
 
 all: README.md

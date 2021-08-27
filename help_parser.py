@@ -22,30 +22,36 @@ parser.add_argument('-o', '--output_file', dest = 'output_file', default = None,
 parser.add_argument('-w', '--print_own', dest = 'print_own', action='store_true',
                     help='Print just current owners; useful for an overview')
 
+parser.add_argument('-m', '--meeting_print', dest = 'meeting_print', action='store_true',
+                    help='Print all transfer ways')
+
+parser.add_argument('-i', '--inaccessability_default', dest = 'inaccessability_default', type=float, default = 0,
+                    help='Default inaccessability; default is 0; adding any inaccessability decreases speed at ~20%%')
+
 parser.add_argument('-l', '--print_log', dest = 'print_log', action='store_true',
                     help='Print total pain and temperature instead of progress bars')
-
-parser.add_argument('-a', '--auto_complete', dest = 'auto_complete', action='store_true',
-                    help='Allows not full completed text data files; people are auto-completed with 10 optimal_weight \
-                            and 10 sensevity; things have 1 kg mass and don\'t belong to anybody.')
 
 parser.add_argument('-d', '--disable_progress_info', dest = 'disable_progress_info', action='store_true',
                     help='No progress info')
 
-parser.add_argument('-e', '--epoch_number', dest = 'epoch_number', type=int, default = 3,
+parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 2_000,
+                    help='Number of iterations between updating bar/log; default is 1_000')
+
+parser.add_argument('-a', '--auto_complete', dest = 'auto_complete', action='store_true',
+                    help='Allows not full completed TEXT data files; people are auto-completed with 10 optimal_weight \
+                            and 10 sensevity; things have 1 kg mass and don\'t belong to anybody.')
+
+parser.add_argument('-E', '--epoch_number', dest = 'epoch_number', type=int, default = 3,
                     help='Default number of general attempts; default is 3')
 
-parser.add_argument('-i', '--iteration_number', dest = 'iteration_number', type=int, default = 300_000,
+parser.add_argument('-I', '--iteration_number', dest = 'iteration_number', type=int, default = 300_000,
                     help='Default number of iteration in each attempt; if not specified, equals to 300_000')
 
-parser.add_argument('-g', '--gradient', dest = 'gradient', type=float, default = 100_000,
+parser.add_argument('-G', '--gradient', dest = 'gradient', type=float, default = 100_000,
                     help='Number of iterations it takes to decrease temperature in 10 times; default is 100_000')
 
 parser.add_argument('-T', '--start_temperature', dest = 'start_temperature', type=float, default = 50,
                     help='Start temperature; default is 50 (pains)')
-
-parser.add_argument('-u', '--update_freq', dest = 'update_freq', type=int, default = 1_000,
-                    help='Number of iterations between updating bar/log; default is 1_000')
 
 parser.add_argument('--pain_multiply', dest = 'pain_multiply', type=float, default = 10,
                     help='Default pain (at optimal weight); default is 10')
@@ -55,6 +61,9 @@ parser.add_argument('--opt_default', dest = 'opt_default', type=float, default =
 
 parser.add_argument('--sens_default', dest = 'sens_default', type=float, default = 10,
                     help='Default optimal value; default is 10')
+
+parser.add_argument('--v_name_default', dest = 'v_name_default', type=str, default = 'v',
+                    help='Default value name; default is «v»')
 
 def parse():
       # parse part

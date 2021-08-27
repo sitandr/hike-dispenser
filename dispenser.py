@@ -1,142 +1,21 @@
 import random
-import os, sys
-
-import yaml
 
 import help_parser
-from tools import *
-import data_classes
+import data_reader
 
-default_value_name = 'v'
+from tools import print_progress_bar
+import time
 
-def default_optimize_values():
-     return {default_value_name: data_classes.Value(default_value_name)}
+import optimize
+from optimize import optimized_rand_move, generate_sequence, generate_transfer_from_seqence
+
 
 args = help_parser.parse() # parse all given flags
+people, things, to_optimize_values = data_reader.read_data(args)
 
+enable_inacs = any([people[p].inaccessibility for p in people])
 
-to_optimize_values = {}
-enable_inacs = False # inaccessibility, slightly decreases speed, so should be tracked
-
-if args.people_and_things_file is not None:
-    # "classic", simple way
-    
-    try: # catch errors of file reading
-        people_file, things_file = args.people_and_things_file
-        assert os.path.isfile(people_file) and os.path.isfile(things_file)
-        
-    except AssertionError:
-        raise AttributeError('Invalid file')
-     
-    try:
-        people = {}
-        
-        data_classes.Value.pain = args.pain_multiply
-        to_optimize_values = default_optimize_values()
-        
-        for line in open(people_file, encoding = 'utf-8'):
-              if not len(line) or line[0] == '#':
-                  continue
-               
-              current = line.strip().split()
-              if not len(current):
-                    continue
-               
-              if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
-              people[current[0]] = data_classes.Person()
-              people[current[0]].name = current[0]
-              people[current[0]].values_optimal     = {default_value_name: float(current[1])}
-              people[current[0]].values_sensitivity = {default_value_name: float(current[2])}
-              
-
-        things = []
-        for line in open(things_file, encoding = 'utf-8'):
-            
-              if not len(line) or line[0] == '#':
-                  continue
-                
-              current = line.strip().split()
-              
-              if not len(current):
-                    continue
-              
-              if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
-              things.append(data_classes.Thing())
-              
-              things[-1].name   = current[0]
-              things[-1].values = {default_value_name: float(current[1])}
-              things[-1].owner  = (None if current[2] == 'None' else current[2])
-              things[-1].moral  = float(current[3])
-
-              
-              
-    except IndexError:
-        raise SyntaxError('Invalid file input length'
-                          + ('. Try -a option to automaticly add insufficient values.' if not  args.auto_complete else '') +
-                          f' Error in line:\n{line}')
-
-    except (TypeError, ValueError):
-        raise SyntaxError(f'Invalid file input. Error in line:\n{line}')
-
-
-
-elif args.yaml_file is not None:
-     
-     assert os.path.isfile(args.yaml_file)
-     import yaml
-     
-     data = yaml.load(open(args.yaml_file, encoding = 'utf-8'), Loader = UniqueKeyLoader)
-     people = {}
-
-     if 'config' in data:
-          for attribute in data['config']:
-               if help_parser.is_default(args, attribute): # command (args) has more priority
-                    setattr(args, attribute, data['config'][attribute])
-               
-     data_classes.Value.pain = args.pain_multiply
-
-     if 'optimize' in data:
-          for v_name in data['optimize'].keys():
-               
-               v = data_classes.Value(v_name)
-               if 'pain' in data['optimize'][v_name]: v.pain = data['optimize'][v_name]['pain']
-
-               to_optimize_values[v_name] = v
-     else:
-          to_optimize_values[v_name] = default_optimize_values()
-
-     for person_name in data['people']:
-          
-          people[person_name] = data_classes.Person()
-          people[person_name].name = person_name
-          
-          if 'inacs' in data['people'][person_name]:
-               people[person_name].inaccessability = data['people'][person_name]['inacs']
-               enable_inacs = True
-               
-          for v in to_optimize_values:
-               current_p = data['people'][person_name]
-                                   
-               people[person_name].values_optimal[v] = (current_p[v]['opt']
-                                                        if (v in current_p and 'opt' in current_p[v]) else
-                                                        args.opt_default)
-               
-               people[person_name].values_sensitivity[v] = (current_p[v]['sens']
-                                                            if (v in current_p and 'sens' in current_p[v]) else
-                                                             args.sens_default)
-          
-     things = []
-     for thing_name in data['things']:
-          things.append(data_classes.Thing())
-          things[-1].name = thing_name
-          d_thing = data['things'][thing_name]
-          
-          if 'owr' in d_thing:
-               things[-1].owner = d_thing['owr']
-               things[-1].moral = d_thing['mrl']
-          things[-1].values = {v: d_thing[v] if v in d_thing else 0 for v in to_optimize_values}
-else:
-     raise AttributeError('No input data provided')
+# inaccessibility, slightly decreases speed, so should be tracked
 
 names = list(people.keys())
 
@@ -147,79 +26,27 @@ try:
 except AssertionError:
      raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
-def generate_sequence():
-      sequence = {name: [] for name in names}
+def print_meet(transfer):
+     s = ''
 
-      for thing in things:
-            name = random.choice(names)
-            sequence[name].append(thing)
-      return sequence
+     for person_name in names:
+          s += person_name + ' :\n'
 
-def personal_pain(things, person_name):
+          for to_p in names:
+               if to_p == person_name:
+                    continue
+               
+               if transfer[person_name, to_p]:
+                    s += f'\t-> {to_p}: ' + ' '.join([t.name for t in transfer[person_name, to_p]]) + '\n'
+               
+               if transfer[to_p, person_name]:
+                    s += f'\t{to_p} ->: ' + ' '.join([t.name for t in transfer[to_p, person_name]]) + '\n'
+     return s
 
-      # special function is needed to optimize calculating pain from random move
-      pain = sum(thing.moral for thing in things if thing.owner != person_name)
-      
-
-      for value_name in to_optimize_values:
-           sum_mass = sum([thing.values[value_name] for thing in things])
-           
-           optimal = people[person_name].values_optimal[value_name]
-           sens    = people[person_name].values_sensitivity[value_name]
-           pain += to_optimize_values[value_name].pain * sens ** (sum_mass/optimal - 1)
-           # TODO: pain_multiply <- file
-      return pain
-
-def count_pain(seq):
-    
-      # needed only for output; optimizing this is senselessly
-      pain = 0
-      for person_name in seq:
-            pain += personal_pain(seq[person_name], person_name)
-      return pain
-
-
-def optimized_rand_move(seq, extra_energy):
-    
-      from_p, to_p = random.sample(names, 2)
-      things_from, things_to = seq[from_p], seq[to_p]
-      
-      if not len(things_from):
-            # interrupt if person we want to take from hasn't things at all
-            return
-
-      # to count energy difference should be known only the energy that changes
-      start_energy = (personal_pain(things_from, from_p) +
-                      personal_pain(things_to, to_p))
-
-      thing_from = random.randrange(len(things_from))
-      
-      if random.random() < 0.5 and len(things_to):
-            # swap
-            thing_to = random.randrange(len(things_to))
-            things_from[thing_from], things_to[thing_to] = (things_to[thing_to],
-                                                            things_from[thing_from])
-            def reverse():
-                  things_from[thing_from], things_to[thing_to] = (things_to[thing_to],
-                                                            things_from[thing_from])
-      else:
-            # move
-            thing = things_from.pop(thing_from)
-            things_to.append(thing)
-            
-            def reverse():
-                  things_from.append(things_to.pop())
-                  
-      final_energy = (personal_pain(things_from, from_p) +
-                      personal_pain(things_to, to_p))
-
-      if final_energy + extra_energy > start_energy:
-            reverse()
-      
-def printer():
+def print_haul(seq):
       s = ''
-      for person_name in sequence:
-            things = sequence[person_name]
+      for person_name in seq:
+            things = seq[person_name]
             
             s1 = '{:<15}'.format(person_name)
             s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
@@ -227,34 +54,41 @@ def printer():
             
             for value_name in to_optimize_values:
                  sum_mass = sum([thing.values[value_name] for thing in things])
-                 if value_name != default_value_name:
+                 if value_name != args.v_name_default:
                       s3 += value_name
                  s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]} '
             
             s += s1 + ':' + s2 + s3 + '\n'
       return s
 
-# needed for meeting calculation
 
-start_sequence = {name: [] for name in names}
-
-for thing in things:
-     name = thing.owner
-     if name is None:
-          continue
-     start_sequence[name].append(thing)
             
-all_text = ''
+
+# create "out" func that would work as file/print output
+if args.output_file:
+     all_text = ''
+     def out(t): global all_text; all_text += t
+else:
+     out = print
+
+optimize.names = names
+optimize.people = people
+optimize.things = things
+optimize.to_optimize_values = to_optimize_values
+optimize.enable_inacs = enable_inacs
+
 if not args.print_own:
       for attempt in range(args.epoch_number):
           
             sequence = generate_sequence()
+            transfer = generate_transfer_from_seqence(sequence)
+            
             if not args.disable_progress_info:
                   print(f'Epoch {attempt + 1}/{args.epoch_number}')
                   
             for i in range(args.iteration_number):
                   T = args.start_temperature*10**(-i/args.gradient)
-                  optimized_rand_move(sequence, T*random.random())
+                  optimized_rand_move(transfer, sequence, T*random.random())
                         
                   if not i%args.update_freq:
                         if args.print_log:
@@ -264,24 +98,29 @@ if not args.print_own:
                               print_progress_bar(i, args.iteration_number, prefix = 'Progress:',
                                                  suffix = 'Complete')
 
-            print_progress_bar(args.iteration_number, args.iteration_number, prefix = 'Progress:',
-                                                 suffix = 'Complete')
-            text = (f'\nAttempt {attempt + 1}. Total pain: {count_pain(sequence)}. Full info:\n'
-                    + printer())
+            if not args.disable_progress_info and not args.print_log:
+                 print_progress_bar(args.iteration_number, args.iteration_number)
+                 
+            text = (f'\nAttempt {attempt + 1}. Total pain: {optimize.count_pain(sequence)}. Full info:\n'
+                    + print_haul(sequence))
+
+            if args.meeting_print:
+                 text += '\n' + print_meet(generate_transfer_from_seqence(sequence))
             
-            if args.output_file:
-                  all_text += text
-            else:
-                  print(text)
+            out(text)
             
 else:
       # print just owners
-      sequence = start_sequence
+
+      start_sequence = {name: [] for name in names}
+
+      for thing in things:
+          name = thing.owner
+          if name is None:
+               continue
+          start_sequence[name].append(thing)
       
-      if args.output_file:
-          all_text += printer()
-      else:
-          print(printer())
+      out(print_haul(start_sequence))
 
 if args.output_file:
       open(args.output_file, 'w', encoding = 'utf-8').write(all_text)
