@@ -73,6 +73,10 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
    ​	Replacement for *people* file. Names are keys, values are *global variables* or special parameters. For each *global value* **must** be specified `opt` (optimal value) and `sens` (sensitivity).
 
+   Currently available special parameters:
+
+   1. **Inaccessibility**. Highly recommended for *transfer model* (hike planning where you need to directly meet and transfer things to other participants). Marks how much pain the person receives when participates in meeting. However, non-zero values also turn on additional structures for pain calculation, and therefore decrease speed at *~20%* (no matters how many values are non-zero).
+
    `people: <name>: {<global variable>: {opt: <optimal global value>, sens: <sensitivity>}, {<special parameters name>: <special parameter value>}}`
 
 5. **Things** (required)
@@ -104,6 +108,7 @@ people:
   Superman:
     mass: {opt: 100, sens: 20} # superweight
     size: {opt:  20, sens: 30} # but not so big backpack
+    inaccessibility: 10 # don't want to spend time for meetings
 
 things:
   Spaghetti: # don't belong to anybody

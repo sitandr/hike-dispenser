@@ -84,6 +84,8 @@ def read_data(args):
                      
            data_classes.Value.pain = args.pain_multiply
 
+           data_classes.Person.inaccessibility = args.inaccessability_default
+
            if 'optimize' in data:
                 for v_name in data['optimize'].keys():
                      

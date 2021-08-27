@@ -26,7 +26,7 @@ parser.add_argument('-m', '--meeting_print', dest = 'meeting_print', action='sto
                     help='Print all transfer ways')
 
 parser.add_argument('-i', '--inaccessability_default', dest = 'inaccessability_default', type=float, default = 0,
-                    help='Default inaccessability; default is 0; adding any inaccessability decreases speed at ~20%')
+                    help='Default inaccessability; default is 0; adding any inaccessability decreases speed at ~20%%')
 
 parser.add_argument('-l', '--print_log', dest = 'print_log', action='store_true',
                     help='Print total pain and temperature instead of progress bars')
@@ -63,7 +63,7 @@ parser.add_argument('--sens_default', dest = 'sens_default', type=float, default
                     help='Default optimal value; default is 10')
 
 parser.add_argument('--v_name_default', dest = 'v_name_default', type=str, default = 'v',
-                    help='Default value name; default is "v"')
+                    help='Default value name; default is «v»')
 
 def parse():
       # parse part

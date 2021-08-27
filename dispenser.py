@@ -14,6 +14,7 @@ args = help_parser.parse() # parse all given flags
 people, things, to_optimize_values = data_reader.read_data(args)
 
 enable_inacs = any([people[p].inaccessibility for p in people])
+
 # inaccessibility, slightly decreases speed, so should be tracked
 
 names = list(people.keys())
@@ -25,21 +26,21 @@ try:
 except AssertionError:
      raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
-def print_meet(seq):
+def print_meet(transfer):
      s = ''
 
-     for person_name in seq:
+     for person_name in names:
           s += person_name + ' :\n'
 
-          for to_p in seq:
-               if to_p >= person_name:
+          for to_p in names:
+               if to_p == person_name:
                     continue
                
                if transfer[person_name, to_p]:
-                    s += f'\t-> {to_p} ' + ' '.join([t.name for t in transfer[person_name, to_p]]) + '\n'
+                    s += f'\t-> {to_p}: ' + ' '.join([t.name for t in transfer[person_name, to_p]]) + '\n'
                
                if transfer[to_p, person_name]:
-                    s += f'\t {to_p}->' + ' '.join([t.name for t in transfer[to_p, person_name]]) + '\n'
+                    s += f'\t{to_p} ->: ' + ' '.join([t.name for t in transfer[to_p, person_name]]) + '\n'
      return s
 
 def print_haul(seq):
@@ -104,7 +105,7 @@ if not args.print_own:
                     + print_haul(sequence))
 
             if args.meeting_print:
-                 text += '\n' + print_meet(sequence)
+                 text += '\n' + print_meet(generate_transfer_from_seqence(sequence))
             
             out(text)
             
