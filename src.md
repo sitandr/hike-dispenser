@@ -14,7 +14,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 1. **People** file:
 
-   ```
+   ```yaml
    # first column is person name, then optimal value, then sensitivity 
    # (number of times this person pain increases when optimal weight added)
    
@@ -27,7 +27,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 2. **Things** file:
 
-   ```
+   ```yaml
    # first column is thing name, then it's value (weight or smth like this),
    # then it's owner and moral pain if it is carried by someone else 
    # (for ex. Alice don't want to leave guitar)
@@ -108,7 +108,7 @@ people:
   Superman:
     mass: {opt: 100, sens: 20} # superweight
     size: {opt:  20, sens: 30} # but not so big backpack
-    inaccessibility: 10 # don't want to spend time for meetings
+    inacs: 10 # don't want to spend time for meetings
 
 things:
   Spaghetti: # don't belong to anybody
@@ -121,7 +121,7 @@ things:
     own: Bob
     mrl: 0
     
-  Guitar: # don't take place in backpack, size = 0, default
+  Guitar: # doesn't take place in backpack, size = 0, default
     mass: 5
     own: Alice
     mrl: 7

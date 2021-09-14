@@ -1,20 +1,20 @@
 # Automatic hike dispenser
 
-This little program is created to help with planning a group hiking trip. One of the problems is distribution of cargo, such as tents, axes, pots, food, guitars e.t.c. The problem becomes more complicated due to need of transfer if cargo isn't carried by it's owner, various cargo capacities (by mass) and weight sensitivity of different people. This command line tool provides ready (although non-ideal) solution out of box. It uses annealing and... that's all.
+This little program is created to help with planning a group hiking trip. One of the problems is distribution of cargo, such as tents, axes, pots, food, guitars etc. The problem becomes more complicated due to need of transfer if cargo isn't carried by it's owner, various cargo capacities (by mass) and weight sensitivity of different people. This command line tool provides ready (although non-ideal) solution out of box.
 
 ## Theory
 
-The value that is optimized is "pain". To count it, the program assumes that it is exponentially over weight increasing. That helps to strictly limit overload on some persons.
+The value that is optimized is "pain". To count it, the program assumes that it is exponentially over weight increasing. That helps to strictly limit overload on some people. Simulated annealing is used for optimization purposes. It's possible to use more complicated algorithms, but due to subjectivity of optimized value it's not relevant.
 
 ## Usage
 
-### Plain text 
+### Plain text
 
-First, it can be a plain text file. In this case it is impossible to use major part of features, such as multi-parametric optimizing, file config e.t.c. However, it is much simpler and quicker to create. In addition, this way doesn't need pyYaml lib. As required input it takes two files with people and things description. Both files should contain text with line = one person/thing. Empty lines or comments (start with «\#») are possible. Here is the example of usage:
+First, it can be a plain text file. In this case it is impossible to use major part of features, such as multi-parametric optimizing, file config etc. However, it is much simpler and quicker to create. In addition, this way doesn't need pyYaml lib. As required input it takes two files with people and things description. Both files should contain text with line = one person/thing. Empty lines or comments (start with «\#») are possible. Here is the example of usage:
 
 1. **People** file:
 
-   ```
+   ```yaml
    # first column is person name, then optimal value, then sensitivity 
    # (number of times this person pain increases when optimal weight added)
    
@@ -27,7 +27,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 2. **Things** file:
 
-   ```
+   ```yaml
    # first column is thing name, then it's value (weight or smth like this),
    # then it's owner and moral pain if it is carried by someone else 
    # (for ex. Alice don't want to leave guitar)
@@ -108,7 +108,7 @@ people:
   Superman:
     mass: {opt: 100, sens: 20} # superweight
     size: {opt:  20, sens: 30} # but not so big backpack
-    inaccessibility: 10 # don't want to spend time for meetings
+    inacs: 10 # don't want to spend time for meetings
 
 things:
   Spaghetti: # don't belong to anybody
@@ -121,7 +121,7 @@ things:
     own: Bob
     mrl: 0
     
-  Guitar: # don't take place in backpack, size = 0, default
+  Guitar: # doesn't take place in backpack, size = 0, default
     mass: 5
     own: Alice
     mrl: 7
