@@ -18,11 +18,11 @@ First, it can be a plain text file. In this case it is impossible to use major p
    # first column is person name, then optimal value, then sensitivity 
    # (number of times this person pain increases when optimal weight added)
    
-   Alice	 5   15
-   Bob   	 7   10
+   Alice    5   15
+   Bob      7   10
    Superman 100 20
    
-   # 		(kg)
+   #        (kg)
    ```
 
 2. **Things** file:
@@ -32,11 +32,11 @@ First, it can be a plain text file. In this case it is impossible to use major p
    # then it's owner and moral pain if it is carried by someone else 
    # (for ex. Alice don't want to leave guitar)
    
-   Spaghetti   1   None	 0
-   Rice		2	Bob    	 0
-   Guitar 	 	5   Alice  	 7
-   Tent		5   Alice  	 1
-   Supweapon  50	Superman 50
+   Spaghetti   1    None     0
+   Rice        2    Bob      0
+   Guitar      5    Alice    7
+   Tent        5    Alice    1
+   Supweapon  50    Superman 50
    
    #		  (kg)
    ```
@@ -47,7 +47,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 ### YAML
 
-`YAML` is a human-friendly data format with lots of features that could be used as input for this program. Usage of YAML allows using anchors, inheritance, infinities e.t.c. Full syntax description: [Wiki](https://en.wikipedia.org/wiki/YAML#Syntax), [Official spec](http://yaml.org/spec/1.2/spec.html). This input format will be further developed, whereas plain text cannot support more features (cost is too high). Currently, root chapters are (this order is recommended, but not necessary):
+`YAML` is a human-friendly data format with lots of features that could be used as input for this program. Usage of YAML allows using anchors, inheritance, infinities etc. Full syntax description: [Wiki](https://en.wikipedia.org/wiki/YAML#Syntax), [Official spec](http://yaml.org/spec/1.2/spec.html). This input format will be further developed, whereas plain text cannot support more features (cost is too high). Currently, root chapters are (this order is recommended, but not necessary):
 
 1. **Config** (optional)
 
