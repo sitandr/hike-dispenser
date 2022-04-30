@@ -40,7 +40,7 @@ class Sequence:
 
         for thing in things:
             p = random.choice(people)
-            s.seq[p].append(thing)
+            seq[p].append(thing)
 
         s = Sequence(seq, people, things, to_optimize_values)
         return s
@@ -50,7 +50,7 @@ class Sequence:
         seq = self.seq
         "slow function that generates {(from, to): thing}"
         
-        transfer = {(p1, p2): [] for p1 in people for p2 in people}
+        transfer = {(p1, p2): [] for p1 in self.people for p2 in self.people}
         
         # what FIRST GIVES (and second takes)
         for to in seq:
@@ -65,8 +65,8 @@ class Sequence:
 
         # needed only for output; optimizing this is senselessly
         pain = 0
-        for p in people:
-            pain += p.personal_pain(self.seq[p.name])
+        for p in self.people:
+            pain += p.personal_pain(self.seq[p], self.optimize_values)
 
         if self.enable_inacs:
             p_meet = list(itertools.chain(*self.generate_transfer().keys(),

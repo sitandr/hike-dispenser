@@ -5,7 +5,7 @@ import help_parser
 
 def get_person_by_name(people, name):
       try:
-            return next((p for p in test_list if p.name == name))
+            return next((p for p in people if p.name == name))
 
       except StopIteration:
             raise AttributeError(f'No such owner: {name}')
@@ -96,7 +96,6 @@ def read_data(args):
            import yaml
            
            data = yaml.load(open(args.yaml_file, encoding = 'utf-8'), Loader = UniqueKeyLoader)
-           people = {}
 
            if 'config' in data:
                 for attribute in data['config']:
@@ -117,6 +116,7 @@ def read_data(args):
            else:
                 to_optimize_values[v_name] = default_optimize_values()
 
+           people = []
            for person_name in data['people']:
                 
                 p = data_classes.Person()
@@ -129,12 +129,12 @@ def read_data(args):
                      
                 for v in to_optimize_values:
 
-                     p.values_optimal[v] = (current_p[v]['opt']
-                                            if (v in current_p and 'opt' in current_p[v]) else
+                     p.values_optimal[v] = (d_p[v]['opt']
+                                            if (v in d_p and 'opt' in d_p[v]) else
                                             args.opt_default)
                      
-                     p.values_sensitivity[v] = (current_p[v]['sens']
-                                                if (v in current_p and 'sens' in current_p[v]) else
+                     p.values_sensitivity[v] = (d_p[v]['sens']
+                                                if (v in d_p and 'sens' in d_p[v]) else
                                                 args.sens_default)
                 people.append(p)
 

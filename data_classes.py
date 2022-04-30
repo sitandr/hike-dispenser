@@ -23,7 +23,7 @@ class Person:
                   + ' sens ' + ' '.join([v + ': ' + str(self.values_sensitivity[v])
                               for v in self.values_sensitivity]))
 
-      def personal_pain(self, personal_things, to_optimize_values):
+      def personal_pain(self, personal_things, optimize_values):
             """
             function needed to optimize calculating pain from random move
             IMPORTANT: pass any THIS P'S THINGS (imp for optimizing because they don't match "staged") 
@@ -33,12 +33,12 @@ class Person:
 
             pain = sum(thing.moral for thing in personal_things if thing.owner != self.name)
 
-            for value_name in to_optimize_values:
-                 sum_mass = sum([thing.values[value_name] for thing in things])
+            for value_name in optimize_values:
+                 sum_mass = sum([thing.values[value_name] for thing in personal_things])
 
                  optimal = self.values_optimal[value_name]
                  sens    = self.values_sensitivity[value_name]
-                 pain += to_optimize_values[value_name].pain * sens ** (sum_mass/optimal - 1)
+                 pain += optimize_values[value_name].pain * sens ** (sum_mass/optimal - 1)
 
             return pain
 

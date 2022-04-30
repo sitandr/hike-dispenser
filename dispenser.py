@@ -4,11 +4,7 @@ import help_parser
 import data_reader
 
 from tools import print_progress_bar
-import time
-
-import optimize
-from optimize import optimized_rand_move, generate_sequence, generate_transfer_from_seqence
-
+from optimize import optimized_rand_move
 from sequence import Sequence
 
 
@@ -37,7 +33,7 @@ def print_meet(transfer):
 def print_haul(seq):
      s = ''
      for p in seq.seq: # let's iterate over seq instead people; seq could not contain certain person
-         things = seq[p]
+         things = seq.seq[p]
          
          s1 = '{:<15}'.format(p.name)
          s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
@@ -47,7 +43,7 @@ def print_haul(seq):
               sum_mass = sum([thing.values[value_name] for thing in things])
               if value_name != args.v_name_default:
                  s3 += value_name
-              s3 += f' {round(sum_mass, 5)}/{people[person_name].values_optimal[value_name]} '
+              s3 += f' {round(sum_mass, 5)}/{p.values_optimal[value_name]} '
          
          s += s1 + ':' + s2 + s3 + '\n'
      return s
@@ -86,7 +82,7 @@ if not args.print_own:
          if not args.disable_progress_info and not args.print_log:
               print_progress_bar(args.iteration_number, args.iteration_number)
               
-         text = (f'\nAttempt {attempt + 1}. Total pain: {optimize.count_pain(sequence)}. Full info:\n'
+         text = (f'\nAttempt {attempt + 1}. Total pain: {sequence.count_pain()}. Full info:\n'
                 + print_haul(sequence))
 
          if args.meeting_print:

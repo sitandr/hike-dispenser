@@ -33,8 +33,8 @@ def optimized_rand_move(transfer, sequence, extra_energy):
             return
 
       # to count energy difference should be known only the energy that changes
-      start_energy = (from_p.personal_pain(things_from, sequence.to_optimize_values) +
-                      to_p.personal_pain(things_to, sequence.to_optimize_values))
+      start_energy = (from_p.personal_pain(things_from, sequence.optimize_values) +
+                      to_p.personal_pain(things_to, sequence.optimize_values))
 
       thing_from_index = random.randrange(len(things_from))
       thing_from = things_from[thing_from_index]
@@ -53,14 +53,14 @@ def optimized_rand_move(transfer, sequence, extra_energy):
             things_from[thing_from_index], things_to[thing_to_index] = (thing_to, thing_from)
             
             def reverse():
-                  things_from[thing_from], things_to[thing_to] = (thing_from, thing_to)
+                  things_from[thing_from_index], things_to[thing_to_index] = (thing_from, thing_to)
 
                   if sequence.enable_inacs:
                        transfer_move(transfer, thing_from, to_p, from_p)
                        transfer_move(transfer, thing_to,     from_p, to_p)
       else:
             # move
-            thing = things_from.pop(thing_from)
+            thing = things_from.pop(thing_from_index)
             things_to.append(thing)
             if sequence.enable_inacs: add_energy += transfer_move(transfer, thing, from_p, to_p)
                  
@@ -68,8 +68,8 @@ def optimized_rand_move(transfer, sequence, extra_energy):
                   if sequence.enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
                   
-      final_energy = (from_p.personal_pain(things_from, sequence.to_optimize_values) +
-                      to_p.personal_pain(things_to, sequence.to_optimize_values))
+      final_energy = (from_p.personal_pain(things_from, sequence.optimize_values) +
+                      to_p.personal_pain(things_to, sequence.optimize_values))
 
       if final_energy + extra_energy + add_energy > start_energy:
             reverse()
