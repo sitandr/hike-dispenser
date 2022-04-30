@@ -9,46 +9,37 @@ import time
 import optimize
 from optimize import optimized_rand_move, generate_sequence, generate_transfer_from_seqence
 
+from sequence import Sequence
+
+
 
 args = help_parser.parse() # parse all given flags
 people, things, to_optimize_values = data_reader.read_data(args)
 
-enable_inacs = any([people[p].inaccessibility for p in people])
-
-# inaccessibility, slightly decreases speed, so should be tracked
-
-names = list(people.keys())
-
-try:
-     for thing in things:
-          assert thing.owner in names or thing.owner == None
-          
-except AssertionError:
-     raise SyntaxError(f'Owner of thing ({thing}) does not exist.')
 
 def print_meet(transfer):
      s = ''
 
-     for person_name in names:
-         s += person_name + ' :\n'
+     for p in people:
+         s += p.name + ' :\n'
 
-         for to_p in names:
-            if to_p == person_name:
+         for to_p in people:
+            if to_p == p:
                 continue
             
-            if transfer[person_name, to_p]:
-                s += f'\t-> {to_p}: ' + ' '.join([t.name for t in transfer[person_name, to_p]]) + '\n'
+            if transfer[p, to_p]:
+                s += f'\t-> {to_p.name}: ' + ' '.join([t.name for t in transfer[p, to_p]]) + '\n'
             
-            if transfer[to_p, person_name]:
-                s += f'\t{to_p} ->: ' + ' '.join([t.name for t in transfer[to_p, person_name]]) + '\n'
+            if transfer[to_p, p]:
+                s += f'\t{to_p.name} ->: ' + ' '.join([t.name for t in transfer[to_p, p]]) + '\n'
      return s
 
 def print_haul(seq):
      s = ''
-     for person_name in seq:
-         things = seq[person_name]
+     for p in seq.seq: # let's iterate over seq instead people; seq could not contain certain person
+         things = seq[p]
          
-         s1 = '{:<15}'.format(person_name)
+         s1 = '{:<15}'.format(p.name)
          s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
          s3 = ' '
          
@@ -71,17 +62,11 @@ if args.output_file:
 else:
      out = print
 
-optimize.names = names
-optimize.people = people
-optimize.things = things
-optimize.to_optimize_values = to_optimize_values
-optimize.enable_inacs = enable_inacs
-
 if not args.print_own:
      for attempt in range(args.epoch_number):
          
-         sequence = generate_sequence()
-         transfer = generate_transfer_from_seqence(sequence)
+         sequence = Sequence.create_random(people, things, to_optimize_values)
+         transfer = sequence.generate_transfer() # IMPORTANT: transfer is updated only if inacs enabled
          
          if not args.disable_progress_info:
              print(f'Epoch {attempt + 1}/{args.epoch_number}')
@@ -105,22 +90,15 @@ if not args.print_own:
                 + print_haul(sequence))
 
          if args.meeting_print:
-              text += '\n' + print_meet(generate_transfer_from_seqence(sequence))
+              text += '\n' + print_meet(sequence.generate_transfer()) # regenerate because may not be supported
          
          out(text)
          
 else:
      # print just owners
+     out(print_haul(Sequence.create_owner_only(people, things, optimize_values)))
 
-     start_sequence = {p: [] for p in people}
-
-     for thing in things:
-         name = thing.owner
-         if name is None:
-            continue
-         start_sequence[name].append(thing)
      
-     out(print_haul(start_sequence))
 
 if args.output_file:
      open(args.output_file, 'w', encoding = 'utf-8').write(all_text)

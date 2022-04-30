@@ -1,4 +1,5 @@
 import random
+import itertools
 
 class Sequence:
 
@@ -15,6 +16,9 @@ class Sequence:
         self.things = things
         self.optimize_values = optimize_values
 
+        # inaccessibility, slightly decreases speed, so should be tracked
+        self.enable_inacs = any([p.inaccessibility for p in people])
+
     @staticmethod
     def create_owner_only(people, things, optimize_values):
         "create sequence with only owners' things"
@@ -30,38 +34,45 @@ class Sequence:
         return Sequence(seq, people, things, optimize_values)
     
     @staticmethod
-    def create_random(names):
+    def create_random(people, things, to_optimize_values):
         
-        seq = {name: [] for name in names}
+        seq = {p: [] for p in people}
 
         for thing in things:
-            name = random.choice(names)
-            s.seq[name].append(thing)
+            p = random.choice(people)
+            s.seq[p].append(thing)
 
-        s = Sequense(seq)
-        return sequence
+        s = Sequence(seq, people, things, to_optimize_values)
+        return s
 
 
     def generate_transfer(self):
         seq = self.seq
         "slow function that generates {(from, to): thing}"
         
-        all_transfer = {(n1, n2): [] for n1 in names for n2 in names}
+        transfer = {(p1, p2): [] for p1 in people for p2 in people}
         
         # what FIRST GIVES (and second takes)
         for to in seq:
             for thing in seq[to]:
                 if thing.owner is not None and thing.owner != to:
-                    all_transfer[thing.owner, to].append(thing) # owner GIVES
-                    
-        return all_transfer
+                    transfer[thing.owner, to].append(thing) # owner GIVES
+
+        return transfer
 
     def count_pain(self):
-        "sums all p's pain"
+        "sums all pain"
 
         # needed only for output; optimizing this is senselessly
         pain = 0
         for p in people:
             pain += p.personal_pain(self.seq[p.name])
+
+        if self.enable_inacs:
+            p_meet = list(itertools.chain(*self.generate_transfer().keys(),
+                                       *self.generate_transfer().keys()))
+
+            for p in p_meet:
+                pain += p.inaccessibility
 
         return pain
