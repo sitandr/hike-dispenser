@@ -23,7 +23,7 @@ def transfer_move(transfer, thing, from_, to_):
 
       return add_energy
                  
-def optimized_rand_move(transfer, sequence, extra_energy):
+def optimized_rand_move(transfer, sequence, pain_map, extra_energy):
     
       from_p, to_p = random.sample(sequence.seq.keys(), 2)
       things_from, things_to = sequence.seq[from_p], sequence.seq[to_p]
@@ -33,8 +33,10 @@ def optimized_rand_move(transfer, sequence, extra_energy):
             return
 
       # to count energy difference should be known only the energy that changes
-      start_energy = (from_p.personal_pain(things_from, sequence.optimize_values) +
-                      to_p.personal_pain(things_to, sequence.optimize_values))
+      e_f = pain_map[from_p]
+      e_t = pain_map[to_p]
+
+      start_energy = e_f + e_t 
 
       thing_from_index = random.randrange(len(things_from))
       thing_from = things_from[thing_from_index]
@@ -68,10 +70,13 @@ def optimized_rand_move(transfer, sequence, extra_energy):
                   if sequence.enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
 
+      pain_map[from_p] = from_p.personal_pain(things_from, sequence.optimize_values)
+      pain_map[to_p] = to_p.personal_pain(things_to, sequence.optimize_values)
                   
-      final_energy = (from_p.personal_pain(things_from, sequence.optimize_values) +
-                      to_p.personal_pain(things_to, sequence.optimize_values))
+      final_energy = pain_map[from_p] + pain_map[to_p]
 
       if final_energy + extra_energy + add_energy > start_energy:
             reverse()
+            pain_map[from_p] = e_f
+            pain_map[to_p] = e_t
 

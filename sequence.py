@@ -60,6 +60,10 @@ class Sequence:
 
         return transfer
 
+    def generate_pain_map(self):
+        return {p: p.personal_pain(self.seq[p], self.optimize_values)
+                    for p in self.people}
+
     def count_pain(self):
         "sums all pain"
 

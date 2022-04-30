@@ -63,13 +63,14 @@ if not args.print_own:
          
          sequence = Sequence.create_random(people, things, optimize_values)
          transfer = sequence.generate_transfer() # IMPORTANT: transfer is updated only if inacs enabled
+         pain_map = sequence.generate_pain_map()
          
          if not args.disable_progress_info:
              print(f'Epoch {attempt + 1}/{args.epoch_number}')
              
          for i in range(args.iteration_number):
              T = args.start_temperature*10**(-i/args.gradient)
-             optimized_rand_move(transfer, sequence, T*random.random())
+             optimized_rand_move(transfer, sequence, pain_map, T*random.random())
                  
              if not i%args.update_freq:
                  
