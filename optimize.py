@@ -4,15 +4,15 @@ def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
       add_energy = 0
 
-      if thing.owner != from_:
+      if thing.owner != from_: # from_ got from owner
             transfer[thing.owner, from_].remove(thing)
        
             if not (transfer[thing.owner, from_] or transfer[from_, thing.owner]):
-                 # removed all, transfer is deleted -> good
+                 # removed all, from_-owner transfer is deleted -> good
 
                  add_energy -= from_.inaccessibility + thing.owner.inaccessibility
                  
-      if thing.owner != to_:
+      if thing.owner != to_: # gives not to owner
             
             if not (transfer[thing.owner, to_] or transfer[to_, thing.owner]):
                  # before this addition was empty; transfer created -> bad
@@ -44,7 +44,7 @@ def optimized_rand_move(transfer, sequence, extra_energy):
       if random.random() < 0.5 and len(things_to):
             # swap
             thing_to_index = random.randrange(len(things_to))
-            thing_to = things_from[thing_from_index]
+            thing_to = things_to[thing_to_index]
 
             if sequence.enable_inacs:
                   add_energy += transfer_move(transfer, thing_from, from_p, to_p)
@@ -57,7 +57,7 @@ def optimized_rand_move(transfer, sequence, extra_energy):
 
                   if sequence.enable_inacs:
                        transfer_move(transfer, thing_from, to_p, from_p)
-                       transfer_move(transfer, thing_to,     from_p, to_p)
+                       transfer_move(transfer, thing_to, from_p, to_p)
       else:
             # move
             thing = things_from.pop(thing_from_index)
@@ -67,9 +67,11 @@ def optimized_rand_move(transfer, sequence, extra_energy):
             def reverse():
                   if sequence.enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
+
                   
       final_energy = (from_p.personal_pain(things_from, sequence.optimize_values) +
                       to_p.personal_pain(things_to, sequence.optimize_values))
 
       if final_energy + extra_energy + add_energy > start_energy:
             reverse()
+

@@ -2,6 +2,7 @@
 config:
   iteration_number: 200_000 # quite easy, don't give too much time
   opt_default: 7
+  inaccessability_default: 3
 
 optimize:
   mass: {}

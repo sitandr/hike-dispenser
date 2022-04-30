@@ -10,7 +10,7 @@ from sequence import Sequence
 
 
 args = help_parser.parse() # parse all given flags
-people, things, to_optimize_values = data_reader.read_data(args)
+people, things, optimize_values = data_reader.read_data(args)
 
 
 def print_meet(transfer):
@@ -39,7 +39,7 @@ def print_haul(seq):
          s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
          s3 = ' '
          
-         for value_name in to_optimize_values:
+         for value_name in optimize_values:
               sum_mass = sum([thing.values[value_name] for thing in things])
               if value_name != args.v_name_default:
                  s3 += value_name
@@ -61,7 +61,7 @@ else:
 if not args.print_own:
      for attempt in range(args.epoch_number):
          
-         sequence = Sequence.create_random(people, things, to_optimize_values)
+         sequence = Sequence.create_random(people, things, optimize_values)
          transfer = sequence.generate_transfer() # IMPORTANT: transfer is updated only if inacs enabled
          
          if not args.disable_progress_info:
@@ -72,12 +72,14 @@ if not args.print_own:
              optimized_rand_move(transfer, sequence, T*random.random())
                  
              if not i%args.update_freq:
+                 
                  if args.print_log:
                      print(round(count_pain(sequence), 2), round(T, 3))
                      
                  elif not args.disable_progress_info:
                      print_progress_bar(i, args.iteration_number, prefix = 'Progress:',
                                     suffix = 'Complete')
+                 
 
          if not args.disable_progress_info and not args.print_log:
               print_progress_bar(args.iteration_number, args.iteration_number)
