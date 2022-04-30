@@ -70,12 +70,12 @@ if not args.print_own:
              
          for i in range(args.iteration_number):
              T = args.start_temperature*10**(-i/args.gradient)
-             optimized_rand_move(transfer, sequence, pain_map, T*random.random())
+             optimized_rand_move(T*random.random(), transfer, sequence, pain_map)
                  
              if not i%args.update_freq:
                  
                  if args.print_log:
-                     print(round(count_pain(sequence), 2), round(T, 3))
+                     print(round(sequence.count_pain(), 2), round(T, 3))
                      
                  elif not args.disable_progress_info:
                      print_progress_bar(i, args.iteration_number, prefix = 'Progress:',

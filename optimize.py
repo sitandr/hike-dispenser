@@ -1,4 +1,5 @@
 import random
+from tools import weighted_random
 
 def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
@@ -23,9 +24,14 @@ def transfer_move(transfer, thing, from_, to_):
 
       return add_energy
                  
-def optimized_rand_move(transfer, sequence, pain_map, extra_energy):
-    
-      from_p, to_p = random.sample(sequence.seq.keys(), 2)
+def optimized_rand_move(extra_energy, transfer, sequence, pain_map):
+      from_p_i = weighted_random(pain_map)
+      to_p_i = weighted_random((1/i**0.3 for i in pain_map))
+
+      if from_p_i == to_p_i:
+            return
+      
+      from_p, to_p = sequence.people[from_p_i], sequence.people[to_p_i]
       things_from, things_to = sequence.seq[from_p], sequence.seq[to_p]
 
       if not len(things_from):
@@ -33,8 +39,8 @@ def optimized_rand_move(transfer, sequence, pain_map, extra_energy):
             return
 
       # to count energy difference should be known only the energy that changes
-      e_f = pain_map[from_p]
-      e_t = pain_map[to_p]
+      e_f = pain_map[from_p_i]
+      e_t = pain_map[to_p_i]
 
       start_energy = e_f + e_t 
 
@@ -70,13 +76,13 @@ def optimized_rand_move(transfer, sequence, pain_map, extra_energy):
                   if sequence.enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
 
-      pain_map[from_p] = from_p.personal_pain(things_from, sequence.optimize_values)
-      pain_map[to_p] = to_p.personal_pain(things_to, sequence.optimize_values)
+      pain_map[from_p_i] = from_p.personal_pain(things_from, sequence.optimize_values)
+      pain_map[to_p_i] = to_p.personal_pain(things_to, sequence.optimize_values)
                   
-      final_energy = pain_map[from_p] + pain_map[to_p]
+      final_energy = pain_map[from_p_i] + pain_map[to_p_i]
 
       if final_energy + extra_energy + add_energy > start_energy:
             reverse()
-            pain_map[from_p] = e_f
-            pain_map[to_p] = e_t
+            pain_map[from_p_i] = e_f
+            pain_map[to_p_i] = e_t
 

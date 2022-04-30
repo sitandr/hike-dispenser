@@ -1,6 +1,7 @@
 # modificated funcs from StackOverFlow
-
+import random
 import math
+import itertools
 
 try:
       import yaml
@@ -48,6 +49,12 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
         print(' '*length*2, end = '\r')
 
 
+## my funcs
+
+def weighted_random(prob):
+    cum_weights = list(itertools.accumulate(prob))
+    return random._bisect.bisect(cum_weights, random.random() * cum_weights[-1],
+                                 0, len(cum_weights) - 1)
 
 
 
