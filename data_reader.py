@@ -3,10 +3,24 @@ import os
 from tools import *
 import help_parser
 
+def get_person_by_name(people, name):
+      try:
+            return next((p for p in test_list if p.name == name))
+
+      except StopIteration:
+            raise AttributeError(f'No such owner: {name}')
+      
 def read_data(args):
+      '''
+      Opens and parses files specified in args object;
+      Adds config to args properties 
+      '''
+
       def default_optimize_values():
             return {args.v_name_default: data_classes.Value(args.v_name_default)}
+
       to_optimize_values = {}
+      
       if args.people_and_things_file is not None:
           # "classic", simple way
           
@@ -18,8 +32,8 @@ def read_data(args):
               raise AttributeError('Invalid file')
            
           try:
-              people = {}
-              
+              people = []
+
               data_classes.Value.pain = args.pain_multiply
               to_optimize_values = default_optimize_values()
               
@@ -32,10 +46,13 @@ def read_data(args):
                           continue
                      
                     if args.auto_complete: current[1:] = auto_complete(current[1:], [10, 10])
-                    people[current[0]] = data_classes.Person()
-                    people[current[0]].name = current[0]
-                    people[current[0]].values_optimal     = {args.v_name_default: float(current[1])}
-                    people[current[0]].values_sensitivity = {args.v_name_default: float(current[2])}
+                    
+                    p = data_classes.Person()
+                    p.name = current[0]
+                    p.values_optimal     = {args.v_name_default: float(current[1])}
+                    p.values_sensitivity = {args.v_name_default: float(current[2])}
+
+                    people.append(p)
                     
 
               things = []
@@ -50,12 +67,16 @@ def read_data(args):
                           continue
                     
                     if args.auto_complete: current[1:] = auto_complete(current[1:], [1.0, None, 0.0])
-                    things.append(data_classes.Thing())
-                    
-                    things[-1].name   = current[0]
-                    things[-1].values = {args.v_name_default: float(current[1])}
-                    things[-1].owner  = (None if current[2] == 'None' else current[2])
-                    things[-1].moral  = float(current[3])
+
+                    t = data_classes.Thing()
+                    t.name   = current[0]
+                    t.values = {args.v_name_default: float(current[1])}
+                    t.owner  = (None if current[2] == 'None' else
+                                      get_person_by_name(people, current[2]))
+
+                    t.moral  = float(current[3])
+
+                    things.append(t)
 
                     
                     
@@ -98,34 +119,51 @@ def read_data(args):
 
            for person_name in data['people']:
                 
-                people[person_name] = data_classes.Person()
-                people[person_name].name = person_name
+                p = data_classes.Person()
+                d_p = data['people'][person_name]
                 
-                if 'inacs' in data['people'][person_name]:
-                     people[person_name].inaccessability = data['people'][person_name]['inacs']
+                p.name = person_name
+                
+                if 'inacs' in d_p:
+                     p.inaccessability = d_p['inacs']
                      
                 for v in to_optimize_values:
-                     current_p = data['people'][person_name]
-                                         
-                     people[person_name].values_optimal[v] = (current_p[v]['opt']
-                                                              if (v in current_p and 'opt' in current_p[v]) else
-                                                              args.opt_default)
+
+                     p.values_optimal[v] = (current_p[v]['opt']
+                                            if (v in current_p and 'opt' in current_p[v]) else
+                                            args.opt_default)
                      
-                     people[person_name].values_sensitivity[v] = (current_p[v]['sens']
-                                                                  if (v in current_p and 'sens' in current_p[v]) else
-                                                                   args.sens_default)
-                
+                     p.values_sensitivity[v] = (current_p[v]['sens']
+                                                if (v in current_p and 'sens' in current_p[v]) else
+                                                args.sens_default)
+                people.append(p)
+
            things = []
            for thing_name in data['things']:
-                things.append(data_classes.Thing())
-                things[-1].name = thing_name
+                t = data_classes.Thing()
+
+                t.name = thing_name
                 d_thing = data['things'][thing_name]
                 
                 if 'owr' in d_thing:
-                     things[-1].owner = d_thing['owr']
-                     things[-1].moral = d_thing['mrl']
-                things[-1].values = {v: d_thing[v] if v in d_thing else 0 for v in to_optimize_values}
+                     t.owner = get_person_by_name(people, d_thing['owr'])
+                     t.moral = d_thing['mrl']
+
+                t.values = {v: d_thing[v] if v in d_thing else 0 for v in to_optimize_values}
+
+                things.append(t)
       else:
            raise AttributeError('No input data provided')
 
+      # now check whether is correct
+
+      names = [p.name for p in people]
+      u_names = set(names)
+
+      if len(u_names) < len(names):
+            for n in u_names:
+                  names.remove(n)
+
+            raise AttributeError('Names are not unic:' + ', '.join(names))
+      
       return people, things, to_optimize_values
