@@ -44,7 +44,6 @@ def print_haul(seq):
          
          for value_name in seq.optimize_values:
               sum_mass = sum([thing.values[value_name] for thing in things])
-              sum_mass += p.fixed_values[value_name]
 
               if value_name != args.v_name_default:
                  s3 += value_name

@@ -1,5 +1,6 @@
 import random
 from tools import weighted_random
+import math
 
 def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
@@ -26,7 +27,7 @@ def transfer_move(transfer, thing, from_, to_):
                  
 def optimized_rand_move(extra_energy, transfer, sequence, pain_map):
       from_p_i = weighted_random(pain_map)
-      to_p_i = weighted_random((1/i**0.3 for i in pain_map))
+      to_p_i = weighted_random((math.log(i+1) + 1 for i in pain_map))
 
       if from_p_i == to_p_i:
             return
