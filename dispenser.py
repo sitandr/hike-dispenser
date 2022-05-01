@@ -13,13 +13,14 @@ args = help_parser.parse() # parse all given flags
 people, things, optimize_values = data_reader.read_data(args)
 
 
-def print_meet(transfer):
+def print_meet(seq):
+     transfer = seq.generate_full_transfer() # regenerate because may not be supported
      s = ''
 
-     for p in people:
+     for p in seq.people:
          s += p.name + ' :\n'
 
-         for to_p in people:
+         for to_p in seq.people:
             if to_p == p:
                 continue
             
@@ -32,17 +33,21 @@ def print_meet(transfer):
 
 def print_haul(seq):
      s = ''
-     for p in seq.seq: # let's iterate over seq instead people; seq could not contain certain person
-         things = seq.seq[p]
+
+     for p in seq.people:
+         things = seq.full_seq[p]
          
          s1 = '{:<15}'.format(p.name)
-         s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
+         s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in seq.things])))
          s3 = ' '
          
-         for value_name in optimize_values:
-              sum_mass = sum([thing.values[value_name] for thing in things])
+         for value_name in seq.optimize_values:
+              sum_mass = sum([thing.values[value_name] for thing in seq.things])
+              sum_mass += p.fixed_values[value_name]
+
               if value_name != args.v_name_default:
                  s3 += value_name
+
               s3 += f' {better_round(sum_mass, 3)}/{better_round(p.values_optimal[value_name], 2)} '
          
          s += s1 + ':' + s2 + s3 + '\n'
@@ -89,7 +94,7 @@ if not args.print_own:
                 + print_haul(sequence))
 
          if args.meeting_print:
-              text += '\n' + print_meet(sequence.generate_transfer()) # regenerate because may not be supported
+              text += '\n' + print_meet(sequence)
          
          out(text)
          

@@ -3,6 +3,8 @@ import os
 from tools import *
 import help_parser
 
+INF = float('inf')
+
 def get_person_by_name(people, name):
       try:
             return next((p for p in people if p.name == name))
@@ -67,6 +69,7 @@ def person_from_dict(data, name, args, to_optimize_values):
          p.values_sensitivity[v] = (data[v]['sens']
                                     if (v in data and 'sens' in data[v]) else
                                     args.sens_default)
+         p.fixed_values[v] = 0
       return p
 
 def thing_from_dict(data, name, args, people, to_optimize_values):
@@ -75,8 +78,15 @@ def thing_from_dict(data, name, args, people, to_optimize_values):
       t.name = name
       if 'owr' in data:
          t.owner = get_person_by_name(people, data['owr'])
+      
       if 'mrl' in data:
          t.moral = data['mrl']
+         if t.moral == INF:
+               t.fixed = t.owner
+
+      if 'fixed' in data:                
+         t.fixed = get_person_by_name(people, data['fixed']) if data['fixed'] is not True else t.owner
+      
 
       t.values = {v: data[v] if v in data else 0 for v in to_optimize_values}
       return t
@@ -124,6 +134,7 @@ def person_from_list(plist, args):
       p.name = plist[0]
       p.values_optimal     = {args.v_name_default: float(plist[1])}
       p.values_sensitivity = {args.v_name_default: float(plist[2])}
+      p.fixed_values[args.v_name_default] = 0
       return p
 
 def thing_from_list(tlist, people, args):
@@ -134,6 +145,7 @@ def thing_from_list(tlist, people, args):
                     get_person_by_name(people, tlist[2]))
 
       t.moral  = float(tlist[3])
+      t.fixed = None
       return t
 
 def split_strip_comment(line):

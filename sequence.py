@@ -16,8 +16,30 @@ class Sequence:
         self.things = things
         self.optimize_values = optimize_values
 
+
+        self.set_fixed()
+        
         # inaccessibility, slightly decreases speed, so should be tracked
         self.enable_inacs = any([p.inaccessibility for p in people])
+
+    def set_fixed(self):
+        "remove fixed things from seq and add to fixed"
+
+        self.fixed = {p: [] for p in self.people}
+        for thing in self.things:
+            p = thing.fixed
+            if p is None:
+                continue
+
+            for p2 in self.people:
+                if thing in self.seq[p2]:
+                    self.seq[p2].remove(thing)
+                    break
+            
+            self.fixed[p].append(thing)
+
+            for v in self.optimize_values:
+                p.fixed_values[v] += thing.values[v]
 
     @staticmethod
     def create_owner_only(people, things, optimize_values):
@@ -26,6 +48,20 @@ class Sequence:
 
         for thing in things:
             name = thing.owner
+            if name is None:
+                continue
+
+            seq[name].append(thing)
+
+        return Sequence(seq, people, things, optimize_values)
+
+    @staticmethod
+    def create_fixed_only(people, things, optimize_values):
+        "create sequence with only fixed things"
+        seq = {p: [] for p in people}
+
+        for thing in things:
+            name = thing.fixed
             if name is None:
                 continue
 
@@ -63,6 +99,30 @@ class Sequence:
     def generate_pain_map(self):
         return [p.personal_pain(self.seq[p], self.optimize_values)
                     for p in self.people]
+
+    @property
+    def full_seq(self):
+        'return seq united with fix; very slow — copies seq'
+        full = {p: self.seq[p].copy() for p in self.seq}
+
+        for p in self.fixed:
+            full[p].extend(self.fixed[p])
+
+        return full
+
+    def generate_full_transfer(self):
+        seq = self.full_seq
+        "slow function that generates {(from, to): thing} from full seq"
+        
+        transfer = {(p1, p2): [] for p1 in self.people for p2 in self.people}
+        
+        # what FIRST GIVES (and second takes)
+        for to in seq:
+            for thing in seq[to]:
+                if thing.owner is not None and thing.owner != to:
+                    transfer[thing.owner, to].append(thing) # owner GIVES
+
+        return transfer
 
     def count_pain(self):
         "sums all pain"
