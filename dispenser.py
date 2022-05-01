@@ -3,7 +3,7 @@ import random
 import help_parser
 import data_reader
 
-from tools import print_progress_bar
+from tools import print_progress_bar, better_round
 from optimize import optimized_rand_move
 from sequence import Sequence
 
@@ -43,7 +43,7 @@ def print_haul(seq):
               sum_mass = sum([thing.values[value_name] for thing in things])
               if value_name != args.v_name_default:
                  s3 += value_name
-              s3 += f' {round(sum_mass, 5)}/{p.values_optimal[value_name]} '
+              s3 += f' {better_round(sum_mass, 3)}/{better_round(p.values_optimal[value_name], 2)} '
          
          s += s1 + ':' + s2 + s3 + '\n'
      return s

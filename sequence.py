@@ -80,3 +80,4 @@ class Sequence:
                 pain += p.inaccessibility
 
         return pain
+    

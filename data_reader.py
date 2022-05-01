@@ -38,6 +38,16 @@ def read_data(args):
                   names.remove(n)
 
             raise AttributeError('Names are not unic:' + ', '.join(names))
+
+      if args.auto_scale:
+            for v in to_optimize_values:
+                  things_mass = sum((t.values[v] for t in things))
+                  people_mass = sum((p.values_optimal[v] for p in people))
+
+                  k = things_mass/people_mass
+
+                  for p in people:
+                        p.values_optimal[v] *= k
       
       return people, things, to_optimize_values
 

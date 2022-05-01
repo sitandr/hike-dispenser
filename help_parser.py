@@ -28,6 +28,9 @@ parser.add_argument('-m', '--meeting_print', dest = 'meeting_print', action='sto
 parser.add_argument('-i', '--inaccessability_default', dest = 'inaccessability_default', type=float, default = 0,
                     help='Default inaccessability; default is 0; adding any inaccessability decreases speed at ~20%%')
 
+parser.add_argument('-s', '--auto_scale', dest = 'auto_scale', action='store_true',
+                    help='Scale weight to match total weight')
+
 parser.add_argument('-l', '--print_log', dest = 'print_log', action='store_true',
                     help='Print total pain and temperature instead of progress bars')
 

@@ -162,6 +162,7 @@ The full list:
   -i INACCESSABILITY_DEFAULT, --inaccessability_default INACCESSABILITY_DEFAULT
                         Default inaccessability; default is 0; adding any
                         inaccessability decreases speed at ~20%
+  -s, --auto_scale      Scale weight to match total weight
   -l, --print_log       Print total pain and temperature instead of progress
                         bars
   -d, --disable_progress_info

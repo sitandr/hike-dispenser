@@ -51,6 +51,16 @@ def print_progress_bar (iteration, total, prefix = '', suffix = '',
 
 ## my funcs
 
+def get_characteristic(x):
+    return 1 + int(math.floor(math.log10(abs(x))))
+
+def better_round(x, signs):
+      if x == 0:
+            return 0
+      
+      m = signs - get_characteristic(x)
+      return round(x, m) if m > 0 else int(round(x, m))
+
 def weighted_random(prob):
     cum_weights = list(itertools.accumulate(prob))
     return random._bisect.bisect(cum_weights, random.random() * cum_weights[-1],
