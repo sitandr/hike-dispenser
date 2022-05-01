@@ -57,7 +57,6 @@ def person_from_dict(data, name, args, to_optimize_values):
       p = data_classes.Person()
       
       p.name = name
-
       if 'inacs' in data: p.inaccessability = data['inacs']
       
       for v in to_optimize_values:
@@ -120,12 +119,20 @@ def read_yaml(args):
 
      people = []
      for person_name in data['people']:
-          people.append(person_from_dict(data['people'][person_name], person_name,
+          try:
+                people.append(person_from_dict(data['people'][person_name], person_name,
                                                args, to_optimize_values))
+          except Exception as e:
+                raise AttributeError(str(e) + f'\nParsing error at "{person_name}" data: \n'
+                                           + str(data['people'][person_name]))
 
      things = []
      for thing_name in data['things']:
-          things.append(thing_from_dict(data['things'][thing_name], thing_name, args, people, to_optimize_values))
+          try:
+                things.append(thing_from_dict(data['things'][thing_name], thing_name, args, people, to_optimize_values))
+          except Exception as e:
+                raise AttributeError(str(e) + f'\n\nParsing error at "{thing_name}" data:\n'
+                                           + str(data['things'][thing_name]))
 
      return people, things, to_optimize_values
 
