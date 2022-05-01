@@ -81,7 +81,7 @@ First, it can be a plain text file. In this case it is impossible to use major p
 
 5. **Things** (required)
 
-   ​	Replacement for *values* file. Thing names are keys, for each *global value* **can** be specified this thing value, default is *0*. Also can be specified `owr` (owner of this thing, if no, **None** is used). And `mrl` (moral pain gained when is carried by someone else).
+   ​	Replacement for *values* file. Thing names are keys, for each *global value* **can** be specified this thing value, default is *0*. Also can be specified `owr` (owner of this thing, if no, **None** is used). And `mrl` (moral pain gained when is carried by someone else). Additionally, you can set `mrl: .inf` or `fixed: <any person>`. In this case, programm will not try to move the item, it will be fixed to specified person (possibly with transfer).
 
    `things: <thing name>: {<global variable>: <value>, [owr: <owner name>, mrl: <moral pain>]}`
 
