@@ -100,7 +100,6 @@ class Sequence:
         return [p.personal_pain(self.seq[p], self.optimize_values)
                     for p in self.people]
 
-    @property
     def full_seq(self):
         'return seq united with fix; very slow — copies seq'
         full = {p: self.seq[p].copy() for p in self.seq}
@@ -111,8 +110,8 @@ class Sequence:
         return full
 
     def generate_full_transfer(self):
-        seq = self.full_seq
         "slow function that generates {(from, to): thing} from full seq"
+        seq = self.full_seq()
         
         transfer = {(p1, p2): [] for p1 in self.people for p2 in self.people}
         

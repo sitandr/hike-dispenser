@@ -33,16 +33,17 @@ def print_meet(seq):
 
 def print_haul(seq):
      s = ''
+     fs = seq.full_seq()
 
      for p in seq.people:
-         things = seq.full_seq[p]
+         things = fs[p]
          
          s1 = '{:<15}'.format(p.name)
-         s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in seq.things])))
-         s3 = ' '
+         s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
+         s3 = '\n '
          
          for value_name in seq.optimize_values:
-              sum_mass = sum([thing.values[value_name] for thing in seq.things])
+              sum_mass = sum([thing.values[value_name] for thing in things])
               sum_mass += p.fixed_values[value_name]
 
               if value_name != args.v_name_default:
@@ -50,7 +51,7 @@ def print_haul(seq):
 
               s3 += f' {better_round(sum_mass, 3)}/{better_round(p.values_optimal[value_name], 2)} '
          
-         s += s1 + ':' + s2 + s3 + '\n'
+         s += s1 + ':' + s2 + s3 + '\n' + '—'*20 + '\n'
      return s
 
 
