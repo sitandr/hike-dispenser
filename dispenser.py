@@ -7,11 +7,8 @@ from tools import print_progress_bar, better_round
 from optimize import optimized_rand_move
 from sequence import Sequence
 
-
-
 args = help_parser.parse() # parse all given flags
 people, things, optimize_values = data_reader.read_data(args)
-
 
 def print_meet(seq):
      transfer = seq.generate_full_transfer() # regenerate because may not be supported
@@ -53,12 +50,9 @@ def print_haul(seq):
          s += s1 + ':' + s2 + s3 + '\n' + '—'*20 + '\n'
      return s
 
-
-         
-
 # create "out" func that would work as file/print output
+all_text = ''
 if args.output_file:
-     all_text = ''
      def out(t): global all_text; all_text += t
 else:
      out = print
@@ -97,12 +91,10 @@ if not args.print_own:
               text += '\n' + print_meet(sequence)
          
          out(text)
-         
+
 else:
      # print just owners
      out(print_haul(Sequence.create_owner_only(people, things, optimize_values)))
-
-     
 
 if args.output_file:
      open(args.output_file, 'w', encoding = 'utf-8').write(all_text)

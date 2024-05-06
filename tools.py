@@ -61,12 +61,12 @@ def better_round(x, signs):
       m = signs - get_characteristic(x)
       return round(x, m) if m > 0 else int(round(x, m))
 
+import bisect
+
 def weighted_random(prob):
     cum_weights = list(itertools.accumulate(prob))
-    return random._bisect.bisect(cum_weights, random.random() * cum_weights[-1],
+    return bisect.bisect(cum_weights, random.random() * cum_weights[-1],
                                  0, len(cum_weights) - 1)
-
-
 
 def auto_complete(array, default_values):
     "Non-clear function, changes array"

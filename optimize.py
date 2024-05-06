@@ -2,6 +2,14 @@ import random
 from tools import weighted_random
 import math
 
+def transfer_cost(from_, to):
+      if to in from_.special:
+            return from_.special[to]
+      if from_ in to.special:
+            return to.special[from_]
+
+      return from_.inaccessibility + to.inaccessibility
+
 def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
       add_energy = 0
@@ -12,14 +20,14 @@ def transfer_move(transfer, thing, from_, to_):
             if not (transfer[thing.owner, from_] or transfer[from_, thing.owner]):
                  # removed all, from_-owner transfer is deleted -> good
 
-                 add_energy -= from_.inaccessibility + thing.owner.inaccessibility
-                 
+                 add_energy -= transfer_cost(from_, thing.owner)
+
       if thing.owner != to_: # gives not to owner
-            
+
             if not (transfer[thing.owner, to_] or transfer[to_, thing.owner]):
                  # before this addition was empty; transfer created -> bad
 
-                 add_energy += to_.inaccessibility + thing.owner.inaccessibility
+                 add_energy += transfer_cost(to_, thing.owner)
 
             transfer[thing.owner, to_].append(thing)
 

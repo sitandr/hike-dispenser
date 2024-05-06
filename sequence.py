@@ -83,11 +83,12 @@ class Sequence:
 
 
     def generate_transfer(self):
+        from data_classes import Person, Thing
         seq = self.seq
         "slow function that generates {(from, to): thing}"
         
-        transfer = {(p1, p2): [] for p1 in self.people for p2 in self.people}
-        
+        transfer: dict[tuple[Person, Person], list[Thing]] = {(p1, p2): [] for p1 in self.people for p2 in self.people}
+
         # what FIRST GIVES (and second takes)
         for to in seq:
             for thing in seq[to]:
@@ -125,6 +126,7 @@ class Sequence:
 
     def count_pain(self):
         "sums all pain"
+        from optimize import transfer_cost
 
         # needed only for output; optimizing this is senselessly
         pain = 0
@@ -137,6 +139,10 @@ class Sequence:
 
             for p in p_meet:
                 pain += p.inaccessibility
+                
+            meetings = map(lambda pair: sorted(pair, key=lambda p: p.name), self.generate_transfer().keys())
+            for m in meetings:
+                pain += transfer_cost(m[0], m[1])
 
         return pain
     

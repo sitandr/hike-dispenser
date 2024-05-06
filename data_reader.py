@@ -57,7 +57,7 @@ def person_from_dict(data, name, args, to_optimize_values):
       p = data_classes.Person()
       
       p.name = name
-      if 'inacs' in data: p.inaccessability = data['inacs']
+      if 'inacs' in data: p.inaccessibility = data['inacs']
       
       for v in to_optimize_values:
 
@@ -105,7 +105,6 @@ def read_yaml(args):
      data_classes.Value.pain = args.pain_multiply
      data_classes.Person.inaccessibility = args.inaccessability_default
 
-
      if 'optimize' in data:
           to_optimize_values = {}
           for v_name in data['optimize']:
@@ -115,7 +114,7 @@ def read_yaml(args):
 
                to_optimize_values[v_name] = v
      else:
-          to_optimize_values[v_name] = default_optimize_values(args)
+          to_optimize_values = default_optimize_values(args)
 
      people = []
      for person_name in data['people']:
@@ -166,6 +165,8 @@ def read_simple(args):
       people_file, things_file = args.people_and_things_file
       if not(os.path.isfile(people_file) and os.path.isfile(things_file)):
             raise AttributeError('Invalid file path')
+
+      line = None
 
       try:
         people = []

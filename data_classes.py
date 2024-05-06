@@ -12,7 +12,8 @@ class Value:
 class Person:
       name = '<undefined person name>'
       inaccessibility = 0
-      
+      special: dict[str, float] = {}
+
       def __init__(self):
             self.values_optimal = {}
             self.values_sensitivity = {}
@@ -49,7 +50,7 @@ class Thing:
       name = '<undefined thing name>'
       values = {}
       owner = None
-      moral = 0
+      moral = 0.0
       fixed = None
       
       def __repr__(self):
