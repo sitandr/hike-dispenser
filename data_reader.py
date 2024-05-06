@@ -58,7 +58,8 @@ def person_from_dict(data, name, args, to_optimize_values):
       
       p.name = name
       if 'inacs' in data: p.inaccessibility = data['inacs']
-      
+      if 'special' in data: p.special = data['special']
+
       for v in to_optimize_values:
 
          p.values_optimal[v] = (data[v]['opt']

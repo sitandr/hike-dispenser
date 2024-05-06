@@ -20,7 +20,7 @@ class Sequence:
         self.set_fixed()
         
         # inaccessibility, slightly decreases speed, so should be tracked
-        self.enable_inacs = any([p.inaccessibility for p in people])
+        self.enable_inacs = any([p.inaccessibility or len(p.special) for p in people])
 
     def set_fixed(self):
         "remove fixed things from seq and add to fixed"

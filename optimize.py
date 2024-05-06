@@ -3,10 +3,10 @@ from tools import weighted_random
 import math
 
 def transfer_cost(from_, to):
-      if to in from_.special:
-            return from_.special[to]
-      if from_ in to.special:
-            return to.special[from_]
+      if to.name in from_.special:
+            return from_.special[to.name]
+      if from_.name in to.special:
+            return to.special[from_.name]
 
       return from_.inaccessibility + to.inaccessibility
 
