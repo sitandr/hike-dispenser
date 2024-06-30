@@ -34,7 +34,7 @@ def print_haul(seq):
 
      for p in seq.people:
          things = fs[p]
-         
+
          s1 = '{:<15}'.format(p.name)
          s2 = '{:<80}'.format(', '.join(sorted([thing.name for thing in things])))
          s3 = '\n '
@@ -59,42 +59,48 @@ else:
 
 if not args.print_own:
      for attempt in range(args.epoch_number):
-         
-         sequence = Sequence.create_random(people, things, optimize_values)
-         transfer = sequence.generate_transfer() # IMPORTANT: transfer is updated only if inacs enabled
-         pain_map = sequence.generate_pain_map()
-         
-         if not args.disable_progress_info:
-             print(f'Epoch {attempt + 1}/{args.epoch_number}')
-             
-         for i in range(args.iteration_number):
-             T = args.start_temperature*10**(-i/args.gradient)
-             optimized_rand_move(T*random.random(), transfer, sequence, pain_map)
-                 
-             if not i%args.update_freq:
-                 
-                 if args.print_log:
-                     print(round(sequence.count_pain(), 2), round(T, 3))
-                     
-                 elif not args.disable_progress_info:
-                     print_progress_bar(i, args.iteration_number, prefix = 'Progress:',
-                                    suffix = 'Complete')
-                 
+          sequence = Sequence.create_random(people, things, optimize_values)
+          
+          transfer = sequence.generate_transfer() # IMPORTANT: transfer is updated only if inacs enabled
+          pain_map = sequence.generate_pain_map()
+          
+          if not args.disable_progress_info:
+               print(f'Epoch {attempt + 1}/{args.epoch_number}')
+               
+          for i in range(args.iteration_number):
+               T = args.start_temperature*10**(-i/args.gradient)
+               optimized_rand_move(T*random.random(), transfer, sequence, pain_map)
+                    
+               if not i%args.update_freq:
+                    
+                    if args.print_log:
+                         print(round(sequence.count_pain(), 2), round(T, 3))
+                         
+                    elif not args.disable_progress_info:
+                         print_progress_bar(i, args.iteration_number, prefix = 'Progress:',
+                                        suffix = 'Complete')
+                    
 
-         if not args.disable_progress_info and not args.print_log:
-              print_progress_bar(args.iteration_number, args.iteration_number)
-              
-         text = (f'\nAttempt {attempt + 1}. Total pain: {sequence.count_pain()}. Full info:\n'
-                + print_haul(sequence))
+          if not args.disable_progress_info and not args.print_log:
+               print_progress_bar(args.iteration_number, args.iteration_number)
+               
+          text = (f'\nAttempt {attempt + 1}. Total pain: {sequence.count_pain()}. Full info:\n'
+                    + print_haul(sequence))
 
-         if args.meeting_print:
-              text += '\n' + print_meet(sequence)
-         
-         out(text)
+          if args.meeting_print:
+               text += '\n' + print_meet(sequence)
+          
+          out(text)
 
 else:
      # print just owners
-     out(print_haul(Sequence.create_owner_only(people, things, optimize_values)))
+     seq = Sequence.create_owner_only(people, things, optimize_values)
+     out(print_haul(seq))
+     text = f"\n Total pain: {seq.count_pain()}\n"
+     if args.meeting_print:
+          text += '\n' + print_meet(seq)
+         
+     out(text)
 
 if args.output_file:
      open(args.output_file, 'w', encoding = 'utf-8').write(all_text)

@@ -19,6 +19,9 @@ people:
  Андрей_С.:
    mass: {opt: 7, sens: 10}
    size: &n_size {opt: 20, sens: 10}
+   special:
+    Вова: 0.5
+    НА: 0.5
 
  Вова:
    mass: {opt: 7, sens: 16}
@@ -27,6 +30,8 @@ people:
  Андрей_В.:
    mass: {opt: 8, sens: 11}
    size: *n_size
+   special:
+    Аня: 0.5
 
  Аня:
    mass: {opt: 5, sens: 14}

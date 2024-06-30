@@ -70,12 +70,15 @@ class Sequence:
         return Sequence(seq, people, things, optimize_values)
     
     @staticmethod
-    def create_random(people, things, to_optimize_values):
+    def create_random(people, things, to_optimize_values, start_with_owner=True):
         
         seq = {p: [] for p in people}
 
         for thing in things:
-            p = random.choice(people)
+            if start_with_owner and thing.owner != None:
+                p = thing.owner
+            else:
+                p = random.choice(people)
             seq[p].append(thing)
 
         s = Sequence(seq, people, things, to_optimize_values)
@@ -134,13 +137,7 @@ class Sequence:
             pain += p.personal_pain(self.seq[p], self.optimize_values)
 
         if self.enable_inacs:
-            p_meet = list(itertools.chain(*self.generate_transfer().keys(),
-                                       *self.generate_transfer().keys()))
-
-            for p in p_meet:
-                pain += p.inaccessibility
-                
-            meetings = map(lambda pair: sorted(pair, key=lambda p: p.name), self.generate_transfer().keys())
+            meetings = (sorted(pair, key=lambda p: p.name) for (pair, data) in self.generate_transfer().items() if len(data) > 0)
             for m in meetings:
                 pain += transfer_cost(m[0], m[1])
 

@@ -80,17 +80,17 @@ def optimized_rand_move(extra_energy, transfer, sequence, pain_map):
             thing = things_from.pop(thing_from_index)
             things_to.append(thing)
             if sequence.enable_inacs: add_energy += transfer_move(transfer, thing, from_p, to_p)
-                 
+
             def reverse():
                   if sequence.enable_inacs: transfer_move(transfer, thing, to_p, from_p)
                   things_from.append(things_to.pop())
 
       pain_map[from_p_i] = from_p.personal_pain(things_from, sequence.optimize_values)
       pain_map[to_p_i] = to_p.personal_pain(things_to, sequence.optimize_values)
-                  
+
       final_energy = pain_map[from_p_i] + pain_map[to_p_i]
 
-      if final_energy + extra_energy + add_energy > start_energy:
+      if final_energy + add_energy > start_energy + extra_energy:
             reverse()
             pain_map[from_p_i] = e_f
             pain_map[to_p_i] = e_t
