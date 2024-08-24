@@ -11,7 +11,7 @@ args = help_parser.parse()  # parse all given flags
 
 
 def print_meet(seq):
-    transfer = seq.generate_full_transfer()  # regenerate because may not be supported
+    gen_transfer = seq.generate_full_transfer()  # regenerate because may not be supported
     s = ""
 
     for p in seq.people:
@@ -21,17 +21,17 @@ def print_meet(seq):
             if to_p == p:
                 continue
 
-            if transfer[p, to_p]:
+            if gen_transfer[p, to_p]:
                 s += (
                     f"\t-> {to_p.name}: "
-                    + " ".join([t.name for t in transfer[p, to_p]])
+                    + " ".join([t.name for t in gen_transfer[p, to_p]])
                     + "\n"
                 )
 
-            if transfer[to_p, p]:
+            if gen_transfer[to_p, p]:
                 s += (
                     f"\t{to_p.name} ->: "
-                    + " ".join([t.name for t in transfer[to_p, p]])
+                    + " ".join([t.name for t in gen_transfer[to_p, p]])
                     + "\n"
                 )
     return s
@@ -56,7 +56,7 @@ def print_haul(seq):
 
             s3 += f" {better_round(sum_mass, 3)}/{better_round(p.values_optimal[value_name], 2)} "
 
-        s += s1 + ":" + s2 + s3 + "\n" + "—" * 20 + "\n"
+        s += s1 + ": " + s2 + s3 + "\n" + "—" * 20 + "\n"
     return s
 
 
