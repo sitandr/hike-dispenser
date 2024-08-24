@@ -79,6 +79,7 @@ class Sequence:
                 p = thing.owner
             else:
                 p = random.choice(people)
+
             seq[p].append(thing)
 
         s = Sequence(seq, people, things, to_optimize_values)

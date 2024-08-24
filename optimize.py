@@ -13,10 +13,15 @@ def transfer_cost(from_, to):
 def transfer_move(transfer, thing, from_, to_):
       if thing.owner is None: return 0
       add_energy = 0
+      
+      if thing.owner == from_:
+            add_energy += thing.moral
+      elif thing.owner == to_:
+            add_energy -= thing.moral
 
-      if thing.owner != from_: # from_ got from owner
+      if thing.owner != from_: # got not from owner
             transfer[thing.owner, from_].remove(thing)
-       
+
             if not (transfer[thing.owner, from_] or transfer[from_, thing.owner]):
                  # removed all, from_-owner transfer is deleted -> good
 
@@ -33,19 +38,19 @@ def transfer_move(transfer, thing, from_, to_):
 
       return add_energy
                  
-def optimized_rand_move(extra_energy, transfer, sequence, pain_map):
+def optimized_rand_move(extra_energy, transfer, sequence, pain_map) -> float:
       from_p_i = weighted_random(pain_map)
       to_p_i = weighted_random((math.log(i+1) + 1 for i in pain_map))
 
       if from_p_i == to_p_i:
-            return
+            return 0
       
       from_p, to_p = sequence.people[from_p_i], sequence.people[to_p_i]
       things_from, things_to = sequence.seq[from_p], sequence.seq[to_p]
 
       if not len(things_from):
             # interrupt if person we want to take from hasn't things at all
-            return
+            return 0
 
       # to count energy difference should be known only the energy that changes
       e_f = pain_map[from_p_i]
@@ -94,4 +99,7 @@ def optimized_rand_move(extra_energy, transfer, sequence, pain_map):
             reverse()
             pain_map[from_p_i] = e_f
             pain_map[to_p_i] = e_t
+            return 0
+
+      return (final_energy + add_energy) - start_energy
 
